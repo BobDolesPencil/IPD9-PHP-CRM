@@ -6,9 +6,9 @@ session_start();
 require_once '/vendor/autoload.php';
 
 DB::$host = '127.0.0.1';
-DB::$user = 'slimtodo';
-DB::$password = '0BSHlBr1EzbrXU50';
-DB::$dbName = 'slimtodo';
+DB::$user = 'slimtodo';//change
+DB::$password = '0BSHlBr1EzbrXU50';//change
+DB::$dbName = 'slimtodo';//change
 DB::$port = 3333;
 DB::$encoding = 'utf8';
 
