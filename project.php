@@ -24,12 +24,12 @@ $view->parserOptions = array(
 );
 $view->setTemplatesDirectory(dirname(__FILE__) . '/templates');
 
-if (!isset($_SESSION['todouser'])) {
-    $_SESSION['todouser'] = array();
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = array();
 }
 
 $twig = $app->view()->getEnvironment();
-$twig->addGlobal('todouser', $_SESSION['todouser']);
+$twig->addGlobal('user', $_SESSION['user']);
 
 $app->run();
 
