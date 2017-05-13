@@ -31,6 +31,11 @@ if (!isset($_SESSION['user'])) {
 $twig = $app->view()->getEnvironment();
 $twig->addGlobal('user', $_SESSION['user']);
 
+//State 1;First show
+$app->get('/',function() use($app){
+    $app->render('master.html.twig');
+});
+
 $app->run();
 
 
