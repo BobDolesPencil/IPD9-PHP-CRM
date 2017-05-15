@@ -1,0 +1,58 @@
+main {
+    color: white;
+    border: 1px solid black;
+    width: 750px;
+    height: 750px;
+    background: white url("../Images/Bluewallpapers4.jpg") no-repeat center;
+}
+.errorList{
+    color: red;
+}
+header {
+    padding-left: 35px;
+}
+
+main header h1 {
+    font-size: 3em;
+    font-family: 'Coiny', cursive;
+    margin-bottom: 0;
+}
+
+main header h4 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1em;
+    margin-top: 0;
+}
+
+main table{
+    padding-left:35px;
+}
+
+#username, #pass {
+    color: white;
+    background-color: darkblue;
+    border-color: royalblue;
+    border-radius: 10px;
+    height: 30px;
+    width: 250px;
+}
+
+#btnLogin {
+    color:white;
+    height: 40px;
+    width: 100px;
+    background-color:royalblue;
+    border-color:royalblue;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1em;
+    font-weight:bold;
+}
+
+#btnLogin:hover{
+    cursor:pointer;
+}
+ #forgetpass{
+     padding-left:30px;
+     color:white;
+ }

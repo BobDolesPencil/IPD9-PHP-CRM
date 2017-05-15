@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <title>Login</title>
+        <link href="https://fonts.googleapis.com/css?family=Coiny" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Nova+Slim" rel="stylesheet">
+        <link href="../styles/login.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body onload="window.resizeTo(750, 750);"> 
+        <main>
+            <header>
+                <h1>Login</h1>
+                <h4>Please Enter a Username and Password to login.</h4>
+                {% if error %}
+                    <p class="errorList">Login failed try again.</p>
+                {% endif %}
+            </header>
+            <form method="post">
+                <table>
+                    <tr>
+                        <td>
+                            <label for="username">Username:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="username" name="username" /><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="pass">Password:</label>
+                        </td>
+                        <td>
+                            <input type="password" id="pass" name="pass" /><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button type="submit" id="btnLogin">LOGIN</button>
+                            <a href="#" id="forgetpass">Forget Password?</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </main>
+    </body>
+</html>
