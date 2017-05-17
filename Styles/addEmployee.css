@@ -1,0 +1,28 @@
+caption{
+    padding-top: 35px;
+}
+table{
+    padding-left: 50px;
+}
+.labels {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+td {
+    height: 30px;
+    margin: 5px;
+    padding: 5px;
+}
+
+input {
+    height: 25px;
+}
+img{
+    width:125px;
+    height:150px;
+}
+#submit{
+    height:120px;
+    width:150px;
+}
