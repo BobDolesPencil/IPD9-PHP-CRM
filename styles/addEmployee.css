@@ -19,6 +19,7 @@ input {
     height: 25px;
 }
 img{
+    border: 1px solid #bbb;
     width:125px;
     height:150px;
 }
