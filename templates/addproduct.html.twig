@@ -1,0 +1,58 @@
+{% extends "master.html.twig" %}
+{% block title %}Add Employee{% endblock %}
+{% block headExtra %}
+    <link rel="stylesheet" type="text/css" href="../styles/addEmployee.css"/>
+    <script type="text/javascript" src="../scripts/addEmployee.js"></script>
+{% endblock %}
+{% block content %}       
+    <form method="post" id="form" name="form" onsubmit="return validateForm();">
+        <table>
+            <caption>
+                <h1>Add a Customer</h1>
+            </caption>
+            <tr>
+                <td class="labels">
+                    <label for="productname">Product Name:</label>
+                </td>
+                <td>
+                    <input type="text" id="productname" name="productname" required/>
+                </td>
+                <td class="labels">
+                    <label for="country">Description:</label>
+                </td>
+                <td>
+                    <input type="text" id="description" name="description" required/>
+                </td>
+                <td rowspan="4">
+                    <img src="images/Bluewallpapers4.jpg" alt="product pic"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labels">
+                    <label for="price">Price:</label>
+                </td>
+                <td>
+                    <input type="text" id="price" name="price" required />
+                </td>
+                
+            </tr>
+            <tr>
+                
+                <td class="labels">
+                    <label for="vendorId">Vendor Id:</label>
+                </td>
+                <td>
+                    <input type="tel" id="vendorId" name="vendorId"  required/>
+                </td>
+            </tr>
+          
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Add Product" style="width:260px;height:25px;" />
+                    <input type="reset" value="Clear The Form" style="width:260px;height:25px;" />
+                </td>
+                
+            </tr>
+        </table>
+    </form>
+{% endblock content %}
