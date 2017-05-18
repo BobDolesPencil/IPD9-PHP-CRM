@@ -134,6 +134,57 @@ $app->post('/', function() use($app){
 
 });
 
+//ADD customer ------------BEGIN
+$app->get('/addcustomer', function() use ($app) {
+    $app->render('addcustomer.html.twig');
+});
+
+$app->post('/addcustomer', function() use ($app) {
+    // extract variables
+    $fname = $app->request()->post('firstname');
+    $lname = $app->request()->post('lastname');
+    $address = $app->request()->post('address');
+    $appNo = $app->request()->post('appNo');
+    $postalcode = $app->request()->post('postalcode');
+    $country = $app->request()->post('country');
+    $email = $app->request()->post('email');
+    $phone = $app->request()->post('phone');
+    
+    $valuelist = array(
+        'firstname'=>$fname,
+        'lastname'=>$lname,
+        'address'=>$address,
+        'appNo'=>$appNo,
+        'postalcode'=>$postalcode,
+        'country'=>$country,
+        'email'=>$email,
+        'phone'=>$phone);
+    $errorList = array();
+    //
+    if ($errorList) {
+        $app->render('addcustomer.html.twig', array(
+            'errorList' => $errorList,
+            'v' => $valueList
+        ));
+    } else {
+        DB::insert('customers', array(
+            'firstname'=>$fname,
+            'lastname'=>$lname,
+            'address'=>$address,
+            'appNo'=>$appNo,
+            'postalcode'=>$postalcode,
+            'country'=>$country,
+            'email'=>$email,
+            'phone'=>$phone
+            
+        ));
+        $app->render('customer_added.html.twig');
+    }
+});
+
+
+//ADD customer ---------------END
+
 $app->run();
 
 

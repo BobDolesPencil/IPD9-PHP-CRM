@@ -1,0 +1,34 @@
+*********************** Day one ************************
+1. We both set all Github,Trello and first project settings.
+2. in 24 hours we start the project with creating tables in database.
+*********************** Day one ************************
+Aliakbar
+1. I design the login and the master template
+2. in 24 hours I will work on employee template
+Sebastien
+1.create DB table for customer/employee/products/orders/order details
+2.in 24 hours create twig template for tables
+*********************** Day two ************************
+Aliakbar
+1.I design the add employee form and add it to the project
+2. in 24 hours I will work on form validations
+Sebastien
+1. create twig template for tables
+2.in 24 hours try to implement LESS for alternate master template
+*********************** Day three ************************
+Aliakbar
+1.form validation almost finish
+2. in 24 hours still working on validation
+3. have problem with picture and blob in db
+Sebastien
+1. alternate template complete
+2.in 24 hours I will try to correct css/compiler issue
+*********************** Day four ************************
+Aliakbar
+1. finish the add employee from with all validation
+2. in 24 hours I will start the other templates related to the employee like:edit, delete and list all employee with search
+Sebastien
+1. Still trying to correct day three issue
+2.in 24 hours I will plug in all created templates
+
+

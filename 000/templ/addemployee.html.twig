@@ -1,0 +1,100 @@
+{% extends "master.html.twig" %}
+
+{% block title %}Add an Employee{% endblock %}
+
+{% block headExtra %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#emailInUse").hide();
+        $("input[name=email]").keyup(function() {
+            var email = $(this).val();
+            //console.log("Keyup: " + email);
+            if (email === "") {
+                $("#emailInUse").hide();
+                return;
+            }
+            $.get("/ajax/emailused/" + email, function(result) {
+                result = eval(result);
+                if (result) {
+                    $("#emailInUse").show();
+                } else {
+                    $("#emailInUse").hide();
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock headExtra %}
+
+
+{% block content %}
+    
+{% if errorList %}
+    <ul class="errorList">
+        {% for error in errorList %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!--<form class="form-horizontal" method="post">
+    First Name: <input type="text" name="fname"><br>
+    Last Name: <input type="text" name="lname"><br>
+    Position: <input type="text" name="posId"><br>
+    Email: <input type="email" name="email" value="{{v.email}}">
+        <span id="emailInUse">Email already registered</span><br>
+    Password <input type="password" name="pass1"><br>
+    Password (repeated) <input type="password" name="pass2"><br>
+    <input type="submit" value="Add Employee">
+</form> -->
+        
+        <form class="form-horizontal" method="post">
+                <fieldset>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-user red"></i></span>
+                        <input type="text" class="form-control" placeholder="First Name" name="fname">
+                    </div>
+                    <div class="clearfix"></div><br>
+
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+                        <input type="text" class="form-control" placeholder="Last Name" name="lname">
+                    </div>
+                    <div class="clearfix"></div><br>
+                    
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+                        <input type="email" class="form-control" placeholder="example@example.something" name="email" value="{{v.email}}">
+                         <span id="emailInUse">Email already registered</span><br>
+                    </div>
+                    <div class="clearfix"></div><br>
+                    
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+                        <input type="text" class="form-control" placeholder=" Position Id (1 or 2)" name="posId">
+                    </div>
+                    <div class="clearfix"></div><br>
+                    
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+                        <input type="password" class="form-control" placeholder="Password" name="pass1">
+                    </div>
+                    <div class="clearfix"></div><br>
+                    
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+                        <input type="password" class="form-control" placeholder="Confirm Password" name="pass2">
+                    </div>
+                    <div class="clearfix"></div><br>
+                    
+                    
+                    <p class="center col-md-5">
+                        <button type="submit" class="btn btn-primary">Add Employee</button>
+                    </p>
+                </fieldset>
+            </form>
+
+{% endblock content %}
+        
