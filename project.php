@@ -60,8 +60,8 @@ $app->post('/', function() use ($app) {
 });
 
 $app->post('/addemployee', function() use($app){
-    $fname = $app->request()->post('fname');
-    $lname = $app->request()->post('lname');
+    $fname = $app->request()->post('firstname');
+    $lname = $app->request()->post('lastname');
     $birthdate = $app->request()->post('birthdate');
     $hiredate = $app->request()->post('hiredate');
     $address = $app->request()->post('address');
@@ -74,7 +74,21 @@ $app->post('/addemployee', function() use($app){
     $username = $app->request()->post('username');
     $pass = $app->request()->post('password');
     $image = isset($_FILES['image']) ? $_FILES['image'] : array();
-    //TODO:$valuelist
+    $valuelist = array(
+        'firstname'=>$fname,
+        'lastname'=>$lname,
+        'birthdate'=> $birthdate,
+        'hiredate'=>$hiredate,
+        'address'=>$address,
+        'appNo'=>$appNo,
+        'postalcode'=>$postalcode,
+        'country'=>$country,
+        'email'=>$email,
+        'phone'=>$phone,
+        'title'=>$title,
+        'username'=>$username,
+        'password'=>$pass);
+    
     $errorList = array();
      if ($image) {
         $imageInfo = getimagesize($image["tmp_name"]);
@@ -87,14 +101,14 @@ $app->post('/addemployee', function() use($app){
                 array_push($errorList, "Image must at most 300 by 300 pixels");
             }
         }
-    }
-    
+    }    
     // receive data and insert
     if (!$errorList) {
         $imageBinaryData = file_get_contents($image['tmp_name']);
         $mimeType = mime_content_type($image['tmp_name']);
-        //TODO:DB::insert
-        
+        DB::insert('employee',array(
+            
+        ));     
     } else {
         // TODO: keep values entered on failed submission
         $app->render('addemployee.html.twig', array(
@@ -103,7 +117,6 @@ $app->post('/addemployee', function() use($app){
     }
 
 });
-
 
 $app->run();
 

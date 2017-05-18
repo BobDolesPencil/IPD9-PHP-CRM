@@ -1,14 +1,14 @@
 function validateForm() {
-    var x = document.forms["form"]["fname"].value;
+    var x = document.forms["form"]["firstname"].value;
     if ((x.length < 2) || (x.length > 50)) {
         window.alert("First name must be 2 to 50 characters!");
-        document.getElementById("fname").focus();
+        document.getElementById("firstname").focus();
         return false;
     }
-    x = document.forms["form"]["lname"].value;
+    x = document.forms["form"]["lastname"].value;
     if ((x.length < 2) || (x.length > 50)) {
         window.alert("Last name must be 2 to 50 characters!");
-        document.getElementById("lname").focus();
+        document.getElementById("lastname").focus();
         return false;
     }
     x = new Date(document.getElementById("birthdate").value);
