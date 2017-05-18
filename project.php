@@ -6,9 +6,9 @@ session_start();
 require_once '/vendor/autoload.php';
 
 DB::$host = '127.0.0.1';
-DB::$user = 'test'; //change
-DB::$password = '5Cq5KgBkz9713wz0'; //change
-DB::$dbName = 'test'; //change
+DB::$user = 'crm'; //change
+DB::$password = '2u1VGtbINtmgiE9M'; //change
+DB::$dbName = 'crm'; //change
 DB::$port = 3333;
 DB::$encoding = 'utf8';
 
@@ -36,7 +36,7 @@ $app->get('/', function() use($app) {
     $app->render('addemployee.html.twig');
 });
 
-$app->post('/', function() use ($app) {
+/*$app->post('/', function() use ($app) {
     $username = $app->request()->post('username');
     $pass = $app->request()->post('pass');
     // verification    
@@ -57,9 +57,9 @@ $app->post('/', function() use ($app) {
         $_SESSION['user'] = $user;
         $app->render('login_success.html.twig');
     }
-});
+});*/
 
-$app->post('/addemployee', function() use($app){
+$app->post('/', function() use($app){
     $fname = $app->request()->post('firstname');
     $lname = $app->request()->post('lastname');
     $birthdate = $app->request()->post('birthdate');
@@ -73,7 +73,7 @@ $app->post('/addemployee', function() use($app){
     $title = $app->request()->post('title');
     $username = $app->request()->post('username');
     $pass = $app->request()->post('password');
-    $image = isset($_FILES['image']) ? $_FILES['image'] : array();
+    $image = $_FILES['image'];
     $valuelist = array(
         'firstname'=>$fname,
         'lastname'=>$lname,
@@ -90,27 +90,43 @@ $app->post('/addemployee', function() use($app){
         'password'=>$pass);
     
     $errorList = array();
-     if ($image) {
+     if ($image['error'] == 0) {
         $imageInfo = getimagesize($image["tmp_name"]);
         if (!$imageInfo) {
             array_push($errorList, "File does not look like an valid image");
-        } else {
+        } /*else {
             $width = $imageInfo[0];
             $height = $imageInfo[1];
             if ($width > 300 || $height > 300) {
                 array_push($errorList, "Image must at most 300 by 300 pixels");
             }
-        }
+        }*/
     }    
     // receive data and insert
     if (!$errorList) {
         $imageBinaryData = file_get_contents($image['tmp_name']);
         $mimeType = mime_content_type($image['tmp_name']);
         DB::insert('employee',array(
-            
-        ));     
+            'firstname'=>$fname,
+            'lastname'=>$lname,
+            'hireDate'=>$hiredate,
+            'birthDate'=>$birthdate,
+            'address'=>$address,
+            'appNo'=>$appNo,
+            'postalcode'=>$postalcode,
+            'country'=>$country,
+            'email'=>$email,
+            'phone'=>$phone,
+            'title'=>$title,
+            'username'=>$username,
+            'password'=>$pass,
+            'image'=>$imageBinaryData,
+            'mimetype'=>$mimeType
+        ));   
+        $app->render('addemployee_success.html.twig');
     } else {
-        // TODO: keep values entered on failed submission
+        print_r($errorList);
+        //keep values entered on failed submission
         $app->render('addemployee.html.twig', array(
             'v' => $valueList
         ));

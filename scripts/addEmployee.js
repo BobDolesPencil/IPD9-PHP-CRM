@@ -13,7 +13,7 @@ function validateForm() {
     }
     x = new Date(document.getElementById("birthdate").value);
     var d = new Date();
-    if (x.getFullYear() >= (d.getFullYear()-25)) {
+    if (x.getFullYear() >= (d.getFullYear() - 25)) {
         window.alert("Hire a person younger than 25 years old!!!! It is not possible.");
         document.getElementById("birthdate").focus();
         return false;
@@ -54,10 +54,20 @@ function validateForm() {
         return false;
     }
     var pass2 = document.getElementById("password2").value;
-    if (pass2 != pass1) {
+    if (pass2 !== pass1) {
         window.alert("Both Passwords must be match!");
         document.getElementById("password2").focus();
         return false;
     }
     return true;
+}
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#img').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
 }

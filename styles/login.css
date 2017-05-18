@@ -3,7 +3,7 @@ main {
     border: 1px solid black;
     width: 750px;
     height: 750px;
-    background: white url("../Images/Bluewallpapers4.jpg") no-repeat center;
+    background: white url("../images/Bluewallpapers4.jpg") no-repeat center;
 }
 .errorList{
     color: red;
