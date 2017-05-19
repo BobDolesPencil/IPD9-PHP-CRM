@@ -5,12 +5,42 @@ session_start();
 
 require_once '/vendor/autoload.php';
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// create a log channel
+$log = new Logger('main');
+$log->pushHandler(new StreamHandler('logs/everything.log', Logger::DEBUG));
+$log->pushHandler(new StreamHandler('logs/errors.log', Logger::ERROR));
+
+//connect to Database
 DB::$host = '127.0.0.1';
 DB::$user = 'crm'; //change
 DB::$password = '2u1VGtbINtmgiE9M'; //change
 DB::$dbName = 'crm'; //change
 DB::$port = 3333;
 DB::$encoding = 'utf8';
+
+//Database Error Handler
+DB::$error_handler = 'sql_error_handler';
+DB::$nonsql_error_handler = 'nonsql_error_handler';
+
+function nonsql_error_handler($params) {
+    global $app, $log;
+    $log->error("Database error: " . $params['error']);
+    http_response_code(500);
+    $app->render('error_internal.html.twig');
+    die;
+}
+
+function sql_error_handler($params) {
+    global $app, $log;
+    $log->error("SQL error: " . $params['error']);
+    $log->error(" in query: " . $params['query']);
+    http_response_code(500);
+    $app->render('error_internal.html.twig');
+    die; // don't want to keep going if a query broke
+}
 
 // Slim creation and setup
 $app = new \Slim\Slim(array(
@@ -27,21 +57,22 @@ $view->setTemplatesDirectory(dirname(__FILE__) . '/templates');
 if (!isset($_SESSION['user'])) {
     $_SESSION['user'] = array();
 }
-
 $twig = $app->view()->getEnvironment();
 $twig->addGlobal('user', $_SESSION['user']);
+//$twig->addGlobal('flashmsg', $_SESSION['slim.flash']);
+
 
 //State 1;First show
 $app->get('/', function() use($app) {
-    $app->render('addemployee.html.twig');
+    $app->flash('logedin', 'Loged in successfully.');
+    $app->render('login.html.twig');
 });
-
-/*$app->post('/', function() use ($app) {
+$app->post('/', function() use ($app) {
     $username = $app->request()->post('username');
     $pass = $app->request()->post('pass');
     // verification    
     $error = false;
-    $user = DB::queryFirstRow("SELECT * FROM users WHERE username=%s", $username);
+    $user = DB::queryFirstRow("SELECT * FROM employee WHERE username=%s", $username);
     if (!$user) {
         $error = true;
     } else {
@@ -55,11 +86,29 @@ $app->get('/', function() use($app) {
     } else {
         unset($user['password']);
         $_SESSION['user'] = $user;
-        $app->render('login_success.html.twig');
+        $listallemployee = DB::query("SELECT * FROM employee");
+        $app->render('list_employee.html.twig', array(
+            'listemployees' => $listallemployee));    
     }
-});*/
+});
 
-$app->post('/', function() use($app){
+//Show All Employee
+$app->get('/listemployee', function() use($app) {
+    //var_dump($_SESSION['slim.flash']);
+    $listallemployee = DB::query("SELECT * FROM employee");
+    $app->render('list_employee.html.twig', array(
+        'listemployees' => $listallemployee));
+})->name('logedin');
+$app->get('/viewphotousers/:userId', function($userId) use ($app) {
+    $emp = DB::queryFirstRow("SELECT image, mimetype FROM employee WHERE id=%i", $userId); 
+        $app->response->headers->set('Content-Type', $emp['mimetype']);
+        echo $emp['image'];
+});
+//Add Employee
+$app->get('/addemployee', function() use($app) {
+    $app->render('addemployee.html.twig');
+});
+$app->post('/addemployee', function() use($app) {
     $fname = $app->request()->post('firstname');
     $lname = $app->request()->post('lastname');
     $birthdate = $app->request()->post('birthdate');
@@ -75,70 +124,64 @@ $app->post('/', function() use($app){
     $pass = $app->request()->post('password');
     $image = $_FILES['image'];
     $valuelist = array(
-        'firstname'=>$fname,
-        'lastname'=>$lname,
-        'birthdate'=> $birthdate,
-        'hiredate'=>$hiredate,
-        'address'=>$address,
-        'appNo'=>$appNo,
-        'postalcode'=>$postalcode,
-        'country'=>$country,
-        'email'=>$email,
-        'phone'=>$phone,
-        'title'=>$title,
-        'username'=>$username,
-        'password'=>$pass);
-    
+        'firstname' => $fname,
+        'lastname' => $lname,
+        'birthdate' => $birthdate,
+        'hiredate' => $hiredate,
+        'address' => $address,
+        'appNo' => $appNo,
+        'postalcode' => $postalcode,
+        'country' => $country,
+        'email' => $email,
+        'phone' => $phone,
+        'title' => $title,
+        'username' => $username,
+        'password' => $pass);
+
     $errorList = array();
-     if ($image['error'] == 0) {
+    if ($image['error'] == 0) {
         $imageInfo = getimagesize($image["tmp_name"]);
         if (!$imageInfo) {
             array_push($errorList, "File does not look like an valid image");
-        } /*else {
-            $width = $imageInfo[0];
-            $height = $imageInfo[1];
-            if ($width > 300 || $height > 300) {
-                array_push($errorList, "Image must at most 300 by 300 pixels");
-            }
-        }*/
-    }    
+        }
+    }
     // receive data and insert
     if (!$errorList) {
         $imageBinaryData = file_get_contents($image['tmp_name']);
         $mimeType = mime_content_type($image['tmp_name']);
-        DB::insert('employee',array(
-            'firstname'=>$fname,
-            'lastname'=>$lname,
-            'hireDate'=>$hiredate,
-            'birthDate'=>$birthdate,
-            'address'=>$address,
-            'appNo'=>$appNo,
-            'postalcode'=>$postalcode,
-            'country'=>$country,
-            'email'=>$email,
-            'phone'=>$phone,
-            'title'=>$title,
-            'username'=>$username,
-            'password'=>$pass,
-            'image'=>$imageBinaryData,
-            'mimetype'=>$mimeType
-        ));   
-        $app->render('addemployee_success.html.twig');
+        DB::insert('employee', array(
+            'firstname' => $fname,
+            'lastname' => $lname,
+            'hireDate' => $hiredate,
+            'birthDate' => $birthdate,
+            'address' => $address,
+            'appNo' => $appNo,
+            'postalcode' => $postalcode,
+            'country' => $country,
+            'email' => $email,
+            'phone' => $phone,
+            'title' => $title,
+            'username' => $username,
+            'password' => $pass,
+            'image' => $imageBinaryData,
+            'mimetype' => $mimeType
+        ));
+        $listallemployee = DB::query("SELECT * FROM employee");
+        $app->render('list_employee.html.twig', array(
+            'listemployees' => $listallemployee));
     } else {
         print_r($errorList);
         //keep values entered on failed submission
         $app->render('addemployee.html.twig', array(
-            'v' => $valueList
+            'v' => $valuelist
         ));
     }
-
 });
 
 //ADD customer ------------BEGIN
 $app->get('/addcustomer', function() use ($app) {
     $app->render('addcustomer.html.twig');
 });
-
 $app->post('/addcustomer', function() use ($app) {
     // extract variables
     $fname = $app->request()->post('firstname');
@@ -149,16 +192,16 @@ $app->post('/addcustomer', function() use ($app) {
     $country = $app->request()->post('country');
     $email = $app->request()->post('email');
     $phone = $app->request()->post('phone');
-    
+
     $valuelist = array(
-        'firstname'=>$fname,
-        'lastname'=>$lname,
-        'address'=>$address,
-        'appNo'=>$appNo,
-        'postalcode'=>$postalcode,
-        'country'=>$country,
-        'email'=>$email,
-        'phone'=>$phone);
+        'firstname' => $fname,
+        'lastname' => $lname,
+        'address' => $address,
+        'appNo' => $appNo,
+        'postalcode' => $postalcode,
+        'country' => $country,
+        'email' => $email,
+        'phone' => $phone);
     $errorList = array();
     //
     if ($errorList) {
@@ -168,15 +211,14 @@ $app->post('/addcustomer', function() use ($app) {
         ));
     } else {
         DB::insert('customers', array(
-            'firstname'=>$fname,
-            'lastname'=>$lname,
-            'address'=>$address,
-            'appNo'=>$appNo,
-            'postalcode'=>$postalcode,
-            'country'=>$country,
-            'email'=>$email,
-            'phone'=>$phone
-            
+            'firstname' => $fname,
+            'lastname' => $lname,
+            'address' => $address,
+            'appNo' => $appNo,
+            'postalcode' => $postalcode,
+            'country' => $country,
+            'email' => $email,
+            'phone' => $phone
         ));
         $app->render('customer_added.html.twig');
     }

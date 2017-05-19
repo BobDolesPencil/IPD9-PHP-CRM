@@ -1,0 +1,66 @@
+{% extends "master.html.twig" %}
+{% block title %}All Employees{% endblock %}
+{% block headExtra %}
+    <link rel="stylesheet" type="text/css" href="../styles/listemployee.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../scripts/listEmployee.js"></script>
+{% endblock %}
+{% block content %}
+    <form name="form1" id="form1">
+        <input type="text" placeholder="type to search" size="100" id="search"/>
+        <button id="addEmployeeButton" >Add Employee</button>
+        <table>
+            <tr>
+                <th>
+                    First Name
+                </th>
+                <th>
+                    Last Name
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Phone
+                </th>
+                <th>
+                    Image
+                </th>
+                <th>
+                    Operations
+                </th>
+            </tr>
+            {% for u in listemployees %}
+                <tr>
+                    <td>
+                        {{u.firstname}}
+                    </td>
+                    <td>
+                        {{u.lastname}}
+                    </td>
+                    <td>
+                        {{u.email}}
+                    </td>
+                    <td>
+                        {{u.phone}}
+                    </td>
+                    <td>
+                        <img src="/viewphotousers/{{u.id}}"/>
+                    </td>
+                    {% if user.title == "manager" %}
+                        <td>
+                            <button id="editEmployeeButton" >Edit</button>
+                            <button id="deleteEmployeeButton" >Delete</button>
+                        </td>
+                    {% else %}
+                        <td>
+                            <button id="editEmployeeButton" disabled>Edit</button>
+                            <button id="deleteEmployeeButton" disabled>Delete</button>
+                        </td>
+                    {% endif %}
+
+                </tr>
+            {% endfor %}
+        </table>
+    </form>
+{% endblock content %}

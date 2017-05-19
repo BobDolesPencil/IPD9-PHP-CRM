@@ -18,7 +18,7 @@ body header {
 }
 
 body header h1 {
-    font: bold 4em Arial;
+    font: bold 1em Arial;
     text-shadow: 0 1px 0 #ccc,
                  0 2px 0 #c5c5c5,
                  0 3px 0 #bbb,
@@ -73,6 +73,7 @@ body header h1 {
     width: 1600px;
     height:800px;
     margin: 0;
+    overflow: auto;
 }
 
 footer {
