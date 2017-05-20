@@ -4,50 +4,63 @@
     <head>
         <meta charset="utf-8" />
         <link href="../styles/master.css" type="text/css" rel="stylesheet" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
+
+        </script>
         <title>{% block title %}{% endblock %}</title>
     {% block headExtra %}{% endblock %}
 </head>
-<body>
-    <header>
+<body onload="startTime()">
+    <header>      
         <h1>
             Cutomer Relationship Managment
         </h1>
-        {% if flash.logedin %}
-            <p style="float: right">
-            <h4>
-                {{user.firstname}} is {{flash.logedin}}
-            </h4>
-            <img src="/viewphotousers/{{user.id}}"/>
-        </p>
-    {% endif %}
-</header>
-<aside id="left">
+    </header>
+    <aside id="left">
+        <nav>
+            <ul id="mainmenu">
+                <li>
+                    <a href="#">Dashborad</a>    
+                </li>
+                <li>
+                    <a href="/listemployee">Employees</a>                     
+                </li>
+                <li>
+                    <a href="/addcustomer">Customers</a>                   
+                </li>
+                <li>
+                    <a href="#">Products</a>                    
+                </li>
+                <li>
+                    <a href="#">Order</a>                    
+                </li>
+                <li>
+                    <a href="#">Reports</a>             
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <main id="content">
+    {% block content %}{% endblock %}
+</main>
+<aside id="right">
+    <img src="/viewphotousers/{{user.id}}" id="loginedimg"/>
+    <p>
+        <iframe src="http://free.timeanddate.com/clock/i5q55ask/n165/tt0/tw1/tm1/tb4" frameborder="0" width="123" height="36" id="timedate"></iframe><br/>
     <nav>
         <ul id="mainmenu">
             <li>
-                <a href="#">Dashborad</a>    
+                <a href="/logout">Logout</a>    
             </li>
             <li>
-                <a href="/listemployee">Employees</a>                     
-            </li>
-            <li>
-                <a href="/addcustomer">Customers</a>                   
-            </li>
-            <li>
-                <a href="#">Products</a>                    
-            </li>
-            <li>
-                <a href="#">Order</a>                    
-            </li>
-            <li>
-                <a href="#">Reports</a>             
+                <a href="/listemployee">Change Password</a>                     
             </li>
         </ul>
     </nav>
+{% block leftaside %}{% endblock %}
+</p>
 </aside>
-<main id="content">
-{% block content %}{% endblock %}
-</main>
 <footer>
     <h3>Designed by Aliakbar &amp; Sebastien. All Right Reserved.&copy;</h3>
 </footer>

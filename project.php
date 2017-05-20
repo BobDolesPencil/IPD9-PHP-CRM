@@ -59,10 +59,9 @@ if (!isset($_SESSION['user'])) {
 }
 $twig = $app->view()->getEnvironment();
 $twig->addGlobal('user', $_SESSION['user']);
-//$twig->addGlobal('flashmsg', $_SESSION['slim.flash']);
 
 
-//State 1;First show
+//State 1;First show - Login
 $app->get('/', function() use($app) {
     $app->flash('logedin', 'Loged in successfully.');
     $app->render('login.html.twig');
@@ -91,8 +90,13 @@ $app->post('/', function() use ($app) {
             'listemployees' => $listallemployee));    
     }
 });
+//LogOut
+$app->get('/logout', function() use ($app) {
+    unset($_SESSION['user']);
+    $app->render('logout.html.twig');
+});
 
-//Show All Employee
+//List All Employee
 $app->get('/listemployee', function() use($app) {
     //var_dump($_SESSION['slim.flash']);
     $listallemployee = DB::query("SELECT * FROM employee");
@@ -106,6 +110,7 @@ $app->get('/viewphotousers/:userId', function($userId) use ($app) {
 });
 //Add Employee
 $app->get('/addemployee', function() use($app) {
+    $app->flash('addemployee', 'Employee Added successfully.');
     $app->render('addemployee.html.twig');
 });
 $app->post('/addemployee', function() use($app) {
@@ -176,6 +181,16 @@ $app->post('/addemployee', function() use($app) {
             'v' => $valuelist
         ));
     }
+});
+//Edit Employee
+$app->get('/editemployee/:id',function($id=0) use($app){
+    /*if (($_SESSION['user']['title'] != "manager")) {
+        $app->render('forbidden.html.twig');
+        return;
+    } */
+    $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
+    $app->render("editemployee.html.twig", array(
+            'v' => $valuelist));
 });
 
 //ADD customer ------------BEGIN

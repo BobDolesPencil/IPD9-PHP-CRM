@@ -1,21 +1,22 @@
 {% extends "master.html.twig" %}
 {% block title %}Add Employee{% endblock %}
 {% block headExtra %}
-    <link rel="stylesheet" type="text/css" href="../styles/addEmployee.css"/>
-    <script type="text/javascript" src="../scripts/addEmployee.js"></script>
+    <link rel="stylesheet" type="text/css" href="/styles/addEmployee.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/scripts/addEmployee.js"></script>
 {% endblock %}
 {% block content %}       
-    <form method="post" id="form" name="form" onsubmit="return validateForm();">
+    <form method="post" id="form" name="form" onsubmit="return validateForm();" enctype="multipart/form-data">
         <table>
             <caption>
-                <h1>Add a Customer</h1>
+                <h1>Please Fill up this form to Add Employee.</h1>
             </caption>
             <tr>
                 <td class="labels">
                     <label for="firstname">First Name:</label>
                 </td>
                 <td>
-                    <input type="text" id="firstname" name="firstname" required/>
+                    <input type="text" id="firstname" name="firstname" value="{{v.firstname}}" required/>
                 </td>
                 <td class="labels">
                     <label for="country">Country:</label>
@@ -24,7 +25,7 @@
                     <input type="text" id="country" name="country" value="Canada" required/>
                 </td>
                 <td rowspan="4">
-                    <img src="images/Bluewallpapers4.jpg" alt="uploaded pic"/>
+                    <img src="images/personal.png" alt="uploaded pic" id="img"/>
                 </td>
             </tr>
             <tr>
@@ -32,44 +33,72 @@
                     <label for="lastname">Last Name:</label>
                 </td>
                 <td>
-                    <input type="text" id="lastname" name="lastname" required />
+                    <input type="text" id="lastname" name="lastname" value="{{v.lastname}}" required />
                 </td>
                 <td class="labels">
                     <label for="email">Email:</label>
                 </td>
                 <td>
-                    <input type="email" id="email" name="email" placeholder="name@example.com" required/>
+                    <input type="email" id="email" name="email" placeholder="name@example.com" value="{{v.email}}" required/>
                 </td>
             </tr>
             <tr>
-                
+                <td class="labels">
+                    <label for="birthdate">Birth Date:</label>
+                </td>
+                <td>
+                    <input type="date" id="birthdate" name="birthdate" value="{{v.birthdate|date("Y/m/d")}}" required/>
+                </td>
                 <td class="labels">
                     <label for="phone">Phone:</label>
                 </td>
                 <td>
-                    <input type="tel" id="phone" name="phone" placeholder="999-999-9999" required/>
+                    <input type="tel" id="phone" name="phone" placeholder="999-999-9999" value="{{v.phone}}" required/>
                 </td>
             </tr>
-            
+            <tr>
+                <td class="labels">
+                    <label for="hiredate">Hire Date:</label>
+                </td>
+                <td>
+                    <input type="date" id="hiredate" name="hiredate" value="{{v.hiredate|date("Y/m/d")}}" required/>
+                </td>
+                <td class="labels">
+                    <label for="title">Title:</label>
+                </td>
+                <td>
+                    <select name="title" id="title">
+                        <option value="Manager">Manager</option>
+                        <option value="Employee">Employee</option>
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <td class="labels">
                     <label for="address">Address:</label>
                 </td>
                 <td colspan="3">
-                    <input type="text" id="address" name="address" size="66" required/>
+                    <input type="text" id="address" name="address" size="66" value="{{v.address}}" required/>
                 </td>
-                
+                <td>
+                    <input type="file" name="image" onchange="readURL(this);" style="height:25px;"/>
+                </td>
             </tr>
             <tr>
                 <td class="labels">
                     <label for="appNo">App No.:</label>
                 </td>
                 <td>
-                    <input type="text" id="appNo" name="appNo" pattern="[0-9]{1,}" placeholder="Number Only" required/>
+                    <input type="text" id="appNo" name="appNo" pattern="[0-9]{1,}" placeholder="Number Only" value="{{v.appNo}}"  required/>
                 </td>
-                
+                <td class="labels">
+                    <label for="username">Username:</label>
+                </td>
+                <td>
+                    <input type="text" id="username" name="username" value="{{v.username}}" required/>
+                </td>
                 <td rowspan="3">
-                    <input type="submit" value="Add Customer" id="submit" />
+                    <input type="submit" value="Add Employee" id="submit" />
                 </td>
             </tr>
             <tr>
@@ -79,13 +108,24 @@
                 <td>
                     <input type="text" id="postalcode" name="postalcode" required/>
                 </td>
+                <td class="labels">
+                    <label for="password">Password:</label>
+                </td>
+                <td>
+                    <input type="password" id="password" name="password" required/>
+                </td>
             </tr>
             <tr>
                 <td colspan="2">
                     <input type="reset" value="Clear The Form" style="width:260px;height:25px;" />
                 </td>
-                
+                <td class="labels">
+                    <label for="password2">Confirm Pass:</label>
+                </td>
+                <td>
+                    <input type="password" id="password2" name="password2" required/>
+                </td>
             </tr>
         </table>
     </form>
-{% endblock content %}
+{% endblock %}

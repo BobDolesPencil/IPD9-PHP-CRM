@@ -45,22 +45,37 @@
                         {{u.phone}}
                     </td>
                     <td>
-                        <img src="/viewphotousers/{{u.id}}"/>
+                        <img src="/viewphotousers/{{u.id}}" id="image" alt="Employee Image"/>
                     </td>
-                    {% if user.title == "manager" %}
+                    <td>
+                        <a href="/editemployee/{{u.id}}" class="button">Edit</a>
+                        <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
+                    </td>
+                    {#{% if user.title == "manager" %}
                         <td>
-                            <button id="editEmployeeButton" >Edit</button>
-                            <button id="deleteEmployeeButton" >Delete</button>
+                            <a href="/editemployee/{{u.id}}" class="button">Edit</a>
+                            <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
                         </td>
                     {% else %}
-                        <td>
-                            <button id="editEmployeeButton" disabled>Edit</button>
-                            <button id="deleteEmployeeButton" disabled>Delete</button>
+                         <td>
+                            <a href="#" class="button">Edit</a>
+                            <a href="#" class="button">Delete</a>
                         </td>
-                    {% endif %}
+                    {% endif %}#}
 
                 </tr>
             {% endfor %}
         </table>
     </form>
 {% endblock content %}
+{% block leftaside %}
+    {% if flash.logedin  %}
+        <h4>
+            {{user.firstname}} is {{flash.logedin}}
+        </h4>
+    {% endif %}
+    {% if flash.addemployee %}
+        <h4>{{flash.addemployee}}</h4>
+    {% endif %}
+{% endblock %}
+
