@@ -1,12 +1,17 @@
 {% extends "master.html.twig" %}
 {% block title %}Edit Employee{% endblock %}
 {% block headExtra %}
-    <link rel="stylesheet" type="text/css" href="../styles/addEmployee.css"/>
+    <link rel="stylesheet" type="text/css" href="/styles/addEmployee.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../scripts/addEmployee.js"></script>
+    <script type="text/javascript" src="/scripts/addEmployee.js"></script>
 {% endblock %}
 {% block content %}       
     <form method="post" id="form" name="form" onsubmit="return validateForm();" enctype="multipart/form-data">
+        {% if error %}
+            {% for e in error %}
+                <h5 style="color:red;margin-bottom: 0;">{{e}}</h5>
+            {% endfor %}
+        {% endif %}
         <table>
             <caption>
                 <h1>Please Edit this form then Click on Edit Button.</h1>
@@ -25,7 +30,7 @@
                     <input type="text" id="country" name="country" value="{{v.country}}" required/>
                 </td>
                 <td rowspan="4">
-                    <img src="/viewphotousers/{{v.id}}" id="image" alt="Employee Image"/>
+                    <img src="/viewphotousers/{{v.id}}" id="img" alt="Employee Image"/>
                 </td>
             </tr>
             <tr>
@@ -88,7 +93,7 @@
                     <input type="text" id="address" name="address" size="66" value="{{v.address}}" required/>
                 </td>
                 <td>
-                    <input type="file" name="image" onchange="readURL(this);" style="height:25px;"/>
+                    <input type="file" id="image" name="image" onchange="readURL(this);" style="height:25px;"/>
                 </td>
             </tr>
             <tr>

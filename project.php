@@ -86,8 +86,8 @@ $app->post('/', function() use ($app) {
         unset($user['password']);
         $_SESSION['user'] = $user;
         $listallemployee = DB::query("SELECT * FROM employee");
-        $app->render('list_employee.html.twig', array(
-            'listemployees' => $listallemployee));    
+        $app->render('listemployee.html.twig', array(
+            'listemployees' => $listallemployee));
     }
 });
 //LogOut
@@ -100,13 +100,13 @@ $app->get('/logout', function() use ($app) {
 $app->get('/listemployee', function() use($app) {
     //var_dump($_SESSION['slim.flash']);
     $listallemployee = DB::query("SELECT * FROM employee");
-    $app->render('list_employee.html.twig', array(
+    $app->render('listemployee.html.twig', array(
         'listemployees' => $listallemployee));
 })->name('logedin');
 $app->get('/viewphotousers/:userId', function($userId) use ($app) {
-    $emp = DB::queryFirstRow("SELECT image, mimetype FROM employee WHERE id=%i", $userId); 
-        $app->response->headers->set('Content-Type', $emp['mimetype']);
-        echo $emp['image'];
+    $emp = DB::queryFirstRow("SELECT image, mimetype FROM employee WHERE id=%i", $userId);
+    $app->response->headers->set('Content-Type', $emp['mimetype']);
+    echo $emp['image'];
 });
 //Add Employee
 $app->get('/addemployee', function() use($app) {
@@ -144,6 +144,9 @@ $app->post('/addemployee', function() use($app) {
         'password' => $pass);
 
     $errorList = array();
+    if ($_FILES['image']['size'] == 0) {
+        array_push($errorList, "Image must be uploaded. You can not leave it empty");
+    }
     if ($image['error'] == 0) {
         $imageInfo = getimagesize($image["tmp_name"]);
         if (!$imageInfo) {
@@ -172,25 +175,111 @@ $app->post('/addemployee', function() use($app) {
             'mimetype' => $mimeType
         ));
         $listallemployee = DB::query("SELECT * FROM employee");
-        $app->render('list_employee.html.twig', array(
+        $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
     } else {
-        print_r($errorList);
         //keep values entered on failed submission
         $app->render('addemployee.html.twig', array(
-            'v' => $valuelist
+            'v' => $valuelist,
+            'error' => $errorList
         ));
     }
 });
 //Edit Employee
-$app->get('/editemployee/:id',function($id=0) use($app){
-    /*if (($_SESSION['user']['title'] != "manager")) {
-        $app->render('forbidden.html.twig');
-        return;
-    } */
+$app->get('/editemployee/:id', function($id = 0) use($app) {
+    /* if (($_SESSION['user']['title'] != "manager")) {
+      $app->render('forbidden.html.twig');
+      return;
+      } */
     $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
     $app->render("editemployee.html.twig", array(
-            'v' => $valuelist));
+        'v' => $valuelist));
+});
+$app->post('/editemployee/:id', function($id = 0) use($app) {
+
+    $fname = $app->request()->post('firstname');
+    $lname = $app->request()->post('lastname');
+    $birthdate = $app->request()->post('birthdate');
+    $hiredate = $app->request()->post('hiredate');
+    $address = $app->request()->post('address');
+    $appNo = $app->request()->post('appNo');
+    $postalcode = $app->request()->post('postalcode');
+    $country = $app->request()->post('country');
+    $email = $app->request()->post('email');
+    $phone = $app->request()->post('phone');
+    $title = $app->request()->post('title');
+    $username = $app->request()->post('username');
+    $pass = $app->request()->post('password');
+    $image = $_FILES['image'];
+    $valuelist = array(
+        'firstname' => $fname,
+        'lastname' => $lname,
+        'birthDate' => $birthdate,
+        'hireDate' => $hiredate,
+        'address' => $address,
+        'appNo' => $appNo,
+        'postalcode' => $postalcode,
+        'country' => $country,
+        'email' => $email,
+        'phone' => $phone,
+        'title' => $title,
+        'username' => $username,
+        'password' => $pass);
+
+    $errorList = array();
+    if ($_FILES['image']['size'] == 0) {
+        array_push($errorList, "Image must be uploaded. You can not leave it empty");
+    }
+    if ($image['error'] == 0) {
+        $imageInfo = getimagesize($image["tmp_name"]);
+        if (!$imageInfo) {
+            array_push($errorList, "File does not look like an valid image");
+        }
+    }
+    // receive data and insert
+    if (!$errorList) {
+        $imageBinaryData = file_get_contents($image['tmp_name']);
+        $mimeType = mime_content_type($image['tmp_name']);
+        DB::update('employee', array(
+            'firstname' => $fname,
+            'lastname' => $lname,
+            'hireDate' => $hiredate,
+            'birthDate' => $birthdate,
+            'address' => $address,
+            'appNo' => $appNo,
+            'postalcode' => $postalcode,
+            'country' => $country,
+            'email' => $email,
+            'phone' => $phone,
+            'title' => $title,
+            'username' => $username,
+            'password' => $pass,
+            'image' => $imageBinaryData,
+            'mimetype' => $mimeType
+                ), "id=%i", $id);
+        $listallemployee = DB::query("SELECT * FROM employee");
+        $app->render('listemployee.html.twig', array(
+            'listemployees' => $listallemployee));
+    } else {
+        //keep values entered on failed submission
+        $app->render('editemployee.html.twig', array(
+            'v' => $valuelist,
+            'error' => $errorList
+        ));
+    }
+});
+// Delete Employee
+$app->get('/deleteemployee/:id', function($id = 0) use ($app) {
+    $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
+    $app->render('deleteemployee.html.twig', array(
+        'employee' => $employee
+    ));
+});
+$app->get('/deleteemployee/delete/:id', function($id = 0) use ($app) {
+    DB::delete('employee', 'id=%i', $id);
+    $listallemployee = DB::query("SELECT * FROM employee");
+    $app->render('listemployee.html.twig', array(
+        'listemployees' => $listallemployee));
 });
 
 //ADD customer ------------BEGIN

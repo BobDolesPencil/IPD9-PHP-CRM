@@ -46,6 +46,11 @@ function validateForm() {
         document.getElementById("postalcode").focus();
         return false;
     }
+    var validFile = document.getElementById("imageupload").files.length;
+    if(validFile === 0){
+        window.alert("Image must be uploaded. You can not leave it empty!");
+        return false;
+    }
     var pass1 = document.getElementById("password").value;
     var password = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
     if (!pass1.match(password)) {

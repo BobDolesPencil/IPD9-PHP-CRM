@@ -7,6 +7,11 @@
 {% endblock %}
 {% block content %}       
     <form method="post" id="form" name="form" onsubmit="return validateForm();" enctype="multipart/form-data">
+        {% if error %}
+            {% for e in error %}
+                <h5 style="color:red;">{{e}}</h5>
+            {% endfor %}
+        {% endif %}
         <table>
             <caption>
                 <h1>Please Fill up this form to Add Employee.</h1>
@@ -16,13 +21,17 @@
                     <label for="firstname">First Name:</label>
                 </td>
                 <td>
-                    <input type="text" id="firstname" name="firstname"  required/>
+                    <input type="text" id="firstname" name="firstname" value="{{v.firstname}}"  required/>
                 </td>
                 <td class="labels">
                     <label for="country">Country:</label>
                 </td>
                 <td>
-                    <input type="text" id="country" name="country" value="Canada" required/>
+                    {% if v.country %}
+                        <input type="text" id="country" name="country" value="{{v.country}}" required/>
+                    {% else %}
+                        <input type="text" id="country" name="country" value="Canada" required/>
+                    {% endif %}
                 </td>
                 <td rowspan="4">
                     <img src="images/personal.png" alt="uploaded pic" id="img"/>
@@ -33,13 +42,13 @@
                     <label for="lastname">Last Name:</label>
                 </td>
                 <td>
-                    <input type="text" id="lastname" name="lastname"  required />
+                    <input type="text" id="lastname" name="lastname" value="{{v.lastname}}"  required />
                 </td>
                 <td class="labels">
                     <label for="email">Email:</label>
                 </td>
                 <td>
-                    <input type="email" id="email" name="email" placeholder="name@example.com"  required/>
+                    <input type="email" id="email" name="email" placeholder="name@example.com" value="{{v.email}}" required/>
                 </td>
             </tr>
             <tr>
@@ -78,7 +87,7 @@
                     <label for="address">Address:</label>
                 </td>
                 <td colspan="3">
-                    <input type="text" id="address" name="address" size="66" required/>
+                    <input type="text" id="address" name="address" size="66" value="{{v.address}}" required/>
                 </td>
                 <td>
                     <input type="file" name="image" onchange="readURL(this);" style="height:25px;"/>
@@ -89,13 +98,13 @@
                     <label for="appNo">App No.:</label>
                 </td>
                 <td>
-                    <input type="text" id="appNo" name="appNo" pattern="[0-9]{1,}" placeholder="Number Only" required/>
+                    <input type="text" id="appNo" name="appNo" pattern="[0-9]{1,}" placeholder="Number Only" value="{{v.appNo}}" required/>
                 </td>
                 <td class="labels">
                     <label for="username">Username:</label>
                 </td>
                 <td>
-                    <input type="text" id="username" name="username" required/>
+                    <input type="text" id="username" name="username" value="{{v.username}}" required/>
                 </td>
                 <td rowspan="3">
                     <input type="submit" value="Add Employee" id="submit" />
@@ -106,7 +115,7 @@
                     <label for="postalcode">PostalCode:</label>
                 </td>
                 <td>
-                    <input type="text" id="postalcode" name="postalcode" required/>
+                    <input type="text" id="postalcode" name="postalcode" value="{{v.postalcode}}" required/>
                 </td>
                 <td class="labels">
                     <label for="password">Password:</label>
