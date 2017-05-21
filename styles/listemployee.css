@@ -8,7 +8,7 @@ form{
     background-color: silver;
     color:white;
 }
-#addEmployeeButton{
+#addEmployeeButton,#addCustomerButton{
     height: 35px;
     width: 150px;
     border-radius: 10px;

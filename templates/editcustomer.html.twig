@@ -1,5 +1,5 @@
 {% extends "master.html.twig" %}
-{% block title %}Add Employee{% endblock %}
+{% block title %}Edit Customer{% endblock %}
 {% block headExtra %}
     <link rel="stylesheet" type="text/css" href="/styles/addEmployee.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -7,9 +7,14 @@
 {% endblock %}
 {% block content %}       
     <form method="post" id="form" name="form" onsubmit="return validateForm();" enctype="multipart/form-data">
+        {% if error %}
+            {% for e in error %}
+                <h5 style="color:red;margin-bottom: 0;">{{e}}</h5>
+            {% endfor %}
+        {% endif %}
         <table>
             <caption>
-                <h1>Please Fill up this form to Add Customer.</h1>
+                <h1>Please Edit this form then Click on Edit Button.</h1>
             </caption>
             <tr>
                 <td class="labels">
@@ -44,7 +49,7 @@
                     <label for="birthdate">Birth Date:</label>
                 </td>
                 <td>
-                    <input type="date" id="birthdate" name="birthdate" required/>
+                    <input type="text" id="birthdate" name="birthdate" value="{{v.birthdate}}" required/>
                 </td>
                 <td class="labels">
                     <label for="phone">Phone:</label>
@@ -71,7 +76,7 @@
                  <td>
                 </td>
                 <td rowspan="3">
-                    <input type="submit" value="Add Customer" id="submit" />
+                    <input type="submit" value="Edit Customer" id="submit" />
                 </td> 
             </tr>
             <tr>
@@ -79,14 +84,14 @@
                     <label for="postalcode">PostalCode:</label>
                 </td>
                 <td>
-                    <input type="text" id="postalcode" name="postalcode" required/>
+                    <input type="text" id="postalcode" name="postalcode" value="{{v.postalcode}}" required/>
                 </td>
                 <td>
                 </td>                         
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="reset" value="Clear The Form" style="width:260px;height:25px;" />
+                    <input type="reset" value="Clear The Form" style="width:260px;height:25px;" disabled/>
                 </td>
                 <td>
                 </td>           

@@ -95,14 +95,13 @@ $app->get('/logout', function() use ($app) {
     unset($_SESSION['user']);
     $app->render('logout.html.twig');
 });
-
-//List All Employee
+///////////////////////////// All Employee Actions /////////////////////
+//List All Employees
 $app->get('/listemployee', function() use($app) {
-    //var_dump($_SESSION['slim.flash']);
     $listallemployee = DB::query("SELECT * FROM employee");
     $app->render('listemployee.html.twig', array(
         'listemployees' => $listallemployee));
-})->name('logedin');
+});
 $app->get('/viewphotousers/:userId', function($userId) use ($app) {
     $emp = DB::queryFirstRow("SELECT image, mimetype FROM employee WHERE id=%i", $userId);
     $app->response->headers->set('Content-Type', $emp['mimetype']);
@@ -110,7 +109,6 @@ $app->get('/viewphotousers/:userId', function($userId) use ($app) {
 });
 //Add Employee
 $app->get('/addemployee', function() use($app) {
-    $app->flash('addemployee', 'Employee Added successfully.');
     $app->render('addemployee.html.twig');
 });
 $app->post('/addemployee', function() use($app) {
@@ -174,6 +172,7 @@ $app->post('/addemployee', function() use($app) {
             'image' => $imageBinaryData,
             'mimetype' => $mimeType
         ));
+        $app->flash('addemployee', 'Employee Added successfully.');
         $listallemployee = DB::query("SELECT * FROM employee");
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
@@ -257,6 +256,7 @@ $app->post('/editemployee/:id', function($id = 0) use($app) {
             'image' => $imageBinaryData,
             'mimetype' => $mimeType
                 ), "id=%i", $id);
+        $app->flash('editemployee', 'Employee Edited successfully.');
         $listallemployee = DB::query("SELECT * FROM employee");
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
@@ -271,6 +271,7 @@ $app->post('/editemployee/:id', function($id = 0) use($app) {
 // Delete Employee
 $app->get('/deleteemployee/:id', function($id = 0) use ($app) {
     $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
+    $app->flash('deleteemployee', 'Employee Deleted successfully.');
     $app->render('deleteemployee.html.twig', array(
         'employee' => $employee
     ));
@@ -281,8 +282,15 @@ $app->get('/deleteemployee/delete/:id', function($id = 0) use ($app) {
     $app->render('listemployee.html.twig', array(
         'listemployees' => $listallemployee));
 });
-
-//ADD customer ------------BEGIN
+/////////////////////////////End of All Employee Actions /////////////////////
+///////////////////////////// All Customer Actions /////////////////////
+//List All Customers
+$app->get('/listcustomers', function() use($app) {
+    $listallcustomers = DB::query("SELECT * FROM customers");
+    $app->render('listcustomers.html.twig', array(
+        'listcustomers' => $listallcustomers));
+});
+//Add Customer
 $app->get('/addcustomer', function() use ($app) {
     $app->render('addcustomer.html.twig');
 });
@@ -290,16 +298,17 @@ $app->post('/addcustomer', function() use ($app) {
     // extract variables
     $fname = $app->request()->post('firstname');
     $lname = $app->request()->post('lastname');
+    $birthdate = $app->request()->post('birthdate');
     $address = $app->request()->post('address');
     $appNo = $app->request()->post('appNo');
     $postalcode = $app->request()->post('postalcode');
     $country = $app->request()->post('country');
     $email = $app->request()->post('email');
     $phone = $app->request()->post('phone');
-
     $valuelist = array(
         'firstname' => $fname,
         'lastname' => $lname,
+        'birthdate' => $birthdate,
         'address' => $address,
         'appNo' => $appNo,
         'postalcode' => $postalcode,
@@ -307,29 +316,102 @@ $app->post('/addcustomer', function() use ($app) {
         'email' => $email,
         'phone' => $phone);
     $errorList = array();
-    //
-    if ($errorList) {
-        $app->render('addcustomer.html.twig', array(
-            'errorList' => $errorList,
-            'v' => $valueList
-        ));
-    } else {
+    if (!$errorList) {
         DB::insert('customers', array(
             'firstname' => $fname,
             'lastname' => $lname,
+            'birthDate' => $birthdate,
+            'address' => $address,
+            'appNo' => $appNo,
+            'postalcode' => $postalcode,
+            'country' => $country,
+            'email' => $email,
+            'phone' => $phone,
+        ));
+        $listallcustomers = DB::query("SELECT * FROM customers");
+        $app->render('listcustomers.html.twig', array(
+            'listcustomers' => $listallcustomers));
+    } else {
+
+        $app->render('listcustomers.html.twig', array(
+            'errorList' => $errorList,
+            'v' => $valueList
+        ));
+    }
+});
+//Edit Customer
+$app->get('/editcustomer/:id', function($id = 0) use($app) {
+    /* if (($_SESSION['user']['title'] != "manager")) {
+      $app->render('forbidden.html.twig');
+      return;
+      } */
+    $valuelist = DB::queryFirstRow("SELECT * FROM customers WHERE id=%i", $id);
+    $app->render("editcustomer.html.twig", array(
+        'v' => $valuelist));
+});
+$app->post('/editcustomer/:id', function($id = 0) use($app) {
+
+    $fname = $app->request()->post('firstname');
+    $lname = $app->request()->post('lastname');
+    $birthdate = $app->request()->post('birthdate');
+    $address = $app->request()->post('address');
+    $appNo = $app->request()->post('appNo');
+    $postalcode = $app->request()->post('postalcode');
+    $country = $app->request()->post('country');
+    $email = $app->request()->post('email');
+    $phone = $app->request()->post('phone');
+    $valuelist = array(
+        'firstname' => $fname,
+        'lastname' => $lname,
+        'birthdate' => $birthdate,
+        'address' => $address,
+        'appNo' => $appNo,
+        'postalcode' => $postalcode,
+        'country' => $country,
+        'email' => $email,
+        'phone' => $phone);
+    $errorList = array();
+
+    // receive data and insert
+    if (!$errorList) {
+        DB::update('customers', array(
+            'firstname' => $fname,
+            'lastname' => $lname,
+            'birthDate' => $birthdate,
             'address' => $address,
             'appNo' => $appNo,
             'postalcode' => $postalcode,
             'country' => $country,
             'email' => $email,
             'phone' => $phone
+                ), "id=%i", $id);
+        $app->flash('editcustomer', 'Customer Edited successfully.');
+        $listallcustomers = DB::query("SELECT * FROM customers");
+        $app->render('listcustomers.html.twig', array(
+            'listcustomers' => $listallcustomers));
+    } else {
+        //keep values entered on failed submission
+        $app->render('editcustomer.html.twig', array(
+            'v' => $valuelist,
+            'error' => $errorList
         ));
-        $app->render('customer_added.html.twig');
     }
 });
-
-
-//ADD customer ---------------END
+// Delete Customer
+$app->get('/deletecustomer/:id', function($id = 0) use ($app) {
+    $customer = DB::queryFirstRow('SELECT * FROM customers WHERE id=%i', $id);
+    $app->flash('deletecustomers', 'Customer Deleted successfully.');
+    $app->render('deletecustomer.html.twig', array(
+        'customer' => $customer
+    ));
+});
+$app->get('/deletecustomer/delete/:id', function($id = 0) use ($app) {
+    DB::delete('customers', 'id=%i', $id);
+    $listallcustomers = DB::query("SELECT * FROM customers");
+    $app->render('listcustomers.html.twig', array(
+        'listcustomers' => $listallcustomers));
+});
+/////////////////////////////End of All Customer Actions /////////////////////
 
 $app->run();
 

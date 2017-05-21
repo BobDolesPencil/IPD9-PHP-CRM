@@ -1,14 +1,14 @@
 {% extends "master.html.twig" %}
-{% block title %}All Employees{% endblock %}
+{% block title %}All Customers{% endblock %}
 {% block headExtra %}
-    <link rel="stylesheet" type="text/css" href="/styles/listemployee.css"/>
+    <link rel="stylesheet" type="text/css" property='stylesheet' href="/styles/listemployee.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/scripts/listEmployee.js"></script>
+    <script type="text/javascript" src="/scripts/listcustomer.js"></script>
 {% endblock %}
 {% block content %}
     <form name="form1" id="form1">
         <input type="text" placeholder="type to search" size="100" id="search"/>
-        <button id="addEmployeeButton" >Add Employee</button>
+        <button id="addCustomerButton" >Add Customer</button>
         <table>
             <tr>
                 <th>
@@ -24,32 +24,32 @@
                     Phone
                 </th>
                 <th>
-                    Image
+                   Address
                 </th>
                 <th>
                     Operations
                 </th>
             </tr>
-            {% for u in listemployees %}
+            {% for c in listcustomers %}
                 <tr>
                     <td>
-                        {{u.firstname}}
+                        {{c.firstname}}
                     </td>
                     <td>
-                        {{u.lastname}}
+                        {{c.lastname}}
                     </td>
                     <td>
-                        {{u.email}}
+                        {{c.email}}
                     </td>
                     <td>
-                        {{u.phone}}
+                        {{c.phone}}
                     </td>
                     <td>
-                        <img src="/viewphotousers/{{u.id}}" id="image" alt="Employee Image"/>
+                        {{"#"~c.appNo~","~c.address~","~c.postalcode~","~c.country}}
                     </td>
                     <td>
-                        <a href="/editemployee/{{u.id}}" class="button">Edit</a>
-                        <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
+                        <a href="/editcustomer/{{c.id}}" class="button">Edit</a>
+                        <a href="/deletecustomer/{{c.id}}" class="button">Delete</a>
                     </td>
                     {#{% if user.title == "manager" %}
                         <td>
@@ -69,19 +69,15 @@
     </form>
 {% endblock content %}
 {% block leftaside %}
-    {% if flash.logedin  %}
-        <h4>
-            {{user.firstname}} is {{flash.logedin}}
-        </h4>
+    {% if flash.addcustomer %}
+        <h4>{{flash.addcustomer}}</h4>
     {% endif %}
-    {% if flash.addemployee %}
-        <h4>{{flash.addemployee}}</h4>
+    {% if flash.editcustomer %}
+        <h4>{{flash.editcustomer}}</h4>
     {% endif %}
-    {% if flash.editemployee %}
-        <h4>{{flash.editemployee}}</h4>
-    {% endif %}
-    {% if flash.deleteemployee %}
-        <h4>{{flash.deleteemployee}}</h4>
+    {% if flash.deletecustomer %}
+        <h4>{{flash.deletecustomer}}</h4>
     {% endif %}
 {% endblock %}
+
 

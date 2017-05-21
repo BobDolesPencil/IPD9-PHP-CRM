@@ -1,0 +1,58 @@
+{% extends "master.html.twig" %}
+{% block title %}Delete Customer{% endblock %}
+{% block headExtra %}
+    <link rel="stylesheet" type="text/css" href="/styles/listemployee.css"/>
+{% endblock %}
+{% block content %}       
+    {% if error %}
+        {% for e in error %}
+            <h5 style="color:red;margin-bottom: 0;">{{e}}</h5>
+        {% endfor %}
+    {% endif %}
+        <table>
+            <caption>
+                <h1>You select this Customer to delete.Please confirm if you are sure!</h1>
+            </caption>
+            <tr>
+                <th>
+                    First Name
+                </th>
+                <th>
+                    Last Name
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Phone
+                </th>
+                <th>
+                   Address
+                </th>
+                <th>
+                    Confirm Delete
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    {{customer.firstname}}
+                </td>
+                <td>
+                    {{customer.lastname}}
+                </td>
+                <td>
+                    {{customer.email}}
+                </td>
+                <td>
+                    {{customer.phone}}
+                </td>
+                <td>
+                    {{customer.address}}
+                </td>
+                <td>
+                    <a href="/deletecustomer/delete/{{customer.id}}" class="button">Delete</a>
+                    <a href="/listcustomers" class="button">Cancel</a>
+                </td>
+            </tr>
+        </table>
+{% endblock %}
