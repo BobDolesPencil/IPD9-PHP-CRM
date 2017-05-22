@@ -412,6 +412,150 @@ $app->get('/deletecustomer/delete/:id', function($id = 0) use ($app) {
         'listcustomers' => $listallcustomers));
 });
 /////////////////////////////End of All Customer Actions /////////////////////
+///////////////////////////// All Products Actions /////////////////////
+//List All Products
+$app->get('/listproducts', function() use($app) {
+    $listallproducts = DB::query("SELECT * FROM products");
+    $app->render('listproducts.html.twig', array(
+        'listproducts' => $listallproducts));
+});
+$app->get('/viewphotoproduct/:productId', function($productId) use ($app) {
+    $emp = DB::queryFirstRow("SELECT image, mimetype FROM products WHERE id=%i", $productId);
+    $app->response->headers->set('Content-Type', $emp['mimetype']);
+    echo $emp['image'];
+});
+//Add Product
+$app->get('/addproduct', function() use ($app) {
+    $app->render('addproduct.html.twig');
+});
+$app->post('/addproduct', function() use ($app) {
+    $name = $app->request()->post('productname');
+    $price = $app->request()->post('price');
+    $discount = $app->request()->post('discount');
+    $startdate = $app->request()->post('startdate');
+    $enddate = $app->request()->post('enddate');
+    $catname = $app->request()->post('category');
+    $catid = DB::queryFirstRow("SELECT * FROM category WHERE name=%s", $catname);
+    $image = $_FILES['image'];
+    $valuelist = array(
+        'productname' => $name,
+        'price' => $price,
+        'discount' => $discount
+    );
+    $errorList = array();
+    if ($_FILES['image']['size'] == 0) {
+        array_push($errorList, "Image must be uploaded. You can not leave it empty");
+    }
+    if ($image['error'] == 0) {
+        $imageInfo = getimagesize($image["tmp_name"]);
+        if (!$imageInfo) {
+            array_push($errorList, "File does not look like an valid image");
+        }
+    }
+    if (!$errorList) {
+        $imageBinaryData = file_get_contents($image['tmp_name']);
+        $mimeType = mime_content_type($image['tmp_name']);
+        DB::insert('products', array(
+            'name' => $name,
+            'price' => $price,
+            'categoryId' => $catid['id'],
+            'discount' => $discount,
+            'discountstartdate' => $startdate,
+            'discountenddate' => $enddate,
+            'image' => $imageBinaryData,
+            'mimetype' => $mimeType
+        ));
+        $app->flash('addproduct', 'Product Added Successfully');
+        $listallproducts = DB::query("SELECT * FROM products");
+        $app->render('listproducts.html.twig', array(
+            'listproducts' => $listallproducts));
+    } else {
+        //keep values entered on failed submission
+        $app->render('addproduct.html.twig', array(
+            'v' => $valuelist,
+            'error' => $errorList
+        ));
+    }
+});
+//Edit Product
+$app->get('/editproduct/:id', function($id = 0) use($app) {
+    /* if (($_SESSION['user']['title'] != "manager")) {
+      $app->render('forbidden.html.twig');
+      return;
+      } */
+    $valuelist = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
+    $app->render("editproduct.html.twig", array(
+        'v' => $valuelist));
+});
+$app->post('/editproduct/:id', function($id = 0) use($app) {
+
+    $name = $app->request()->post('productname');
+    $price = $app->request()->post('price');
+    $discount = $app->request()->post('discount');
+    $startdate = $app->request()->post('startdate');
+    $enddate = $app->request()->post('enddate');
+    $catname = $app->request()->post('category');
+    $catid = DB::queryFirstRow("SELECT * FROM category WHERE name=%s", $catname);
+    $image = $_FILES['image'];
+    $valuelist = array(
+        'name' => $name,
+        'price' => $price,
+        'discount' => $discount,
+        'discountstartdate'=>$startdate,
+        'discountenddate'=>$enddate, 
+        'id'=>$id
+    );
+    $errorList = array();
+    if ($_FILES['image']['size'] == 0) {
+        array_push($errorList, "Image must be uploaded. You can not leave it empty");
+    }
+    if ($image['error'] == 0) {
+        $imageInfo = getimagesize($image["tmp_name"]);
+        if (!$imageInfo) {
+            array_push($errorList, "File does not look like an valid image");
+        }
+    }
+    if (!$errorList) {
+        $imageBinaryData = file_get_contents($image['tmp_name']);
+        $mimeType = mime_content_type($image['tmp_name']);
+        DB::update('products', array(
+            'name' => $name,
+            'price' => $price,
+            'categoryId' => $catid['id'],
+            'discount' => $discount,
+            'discountstartdate' => $startdate,
+            'discountenddate' => $enddate,
+            'image' => $imageBinaryData,
+            'mimetype' => $mimeType
+                ), "id=%i", $id);
+        $app->flash('editproduct', 'Product Edited successfully.');
+        $listallproducts = DB::query("SELECT * FROM products");
+        $app->render('listproducts.html.twig', array(
+            'listproducts' => $listallproducts));
+    } else {
+        //keep values entered on failed submission
+        $app->render('editproduct.html.twig', array(
+            'v' => $valuelist,
+            'error' => $errorList
+        ));
+    }
+});
+// Delete Customer
+$app->get('/deleteproduct/:id', function($id = 0) use ($app) {
+    $product = DB::queryFirstRow('SELECT * FROM products WHERE id=%i', $id);
+    $app->flash('deleteproduct', 'Product Deleted successfully.');
+    $app->render('deleteproduct.html.twig', array(
+        'p' => $product
+    ));
+});
+$app->get('/deleteproduct/delete/:id', function($id = 0) use ($app) {
+    DB::delete('products', 'id=%i', $id);
+    $listallproducts = DB::query("SELECT * FROM products");
+    $app->render('listproducts.html.twig', array(
+        'listproducts' => $listallproducts));
+});
+
+/////////////////////////////End of All Products Actions /////////////////////
 
 $app->run();
 

@@ -1,0 +1,128 @@
+{% extends "master.html.twig" %}
+{% block title %}All Products{% endblock %}
+{% block headExtra %}
+    <link href="/styles/listproduct.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+    <article class="tabs">
+
+        <input checked id="one" name="tabs" type="radio">
+        <label for="one">Software</label>
+
+        <input id="two" name="tabs" type="radio" value="Two">
+        <label for="two">Hardware</label>
+        <a href="/addproduct" class="button">Add Product</a>
+        <div class="panels">
+            <div class="panel">
+                <table>
+                    <tr>
+                        <th class="normal">
+                            Product Name
+                        </th>
+                        <th class="price">
+                            Price
+                        </th>
+                        <th class="price">
+                            Discount
+                        </th>
+                        <th class="normal">
+                            Discount Start Date
+                        </th>
+                        <th class="normal">
+                            Discount End Date
+                        </th>
+                        <th class="picture">
+                            Picture
+                        </th>
+                        <th>
+                            Operations
+                        </th>
+                    </tr>
+                    {% for p in listproducts %}
+                        {% if p.categoryId == 1 %}
+                            <tr>
+                                <td class="normal">
+                                    {{p.name}}
+                                </td>
+                                <td class="price">
+                                    {{p.price}}
+                                </td>
+                                <td class="price">
+                                    {{p.discount}}
+                                </td>
+                                <td class="normal">
+                                    {{p.discountstartdate}}
+                                </td>
+                                <td class="normal">
+                                    {{p.discountenddate}}
+                                </td>
+                                <td class="picture">
+                                    <img src="/viewphotoproduct/{{p.id}}" id="image" alt="Product Image"/>
+                                </td>
+                                <td>
+                                    <a href="/editproduct/{{p.id}}" class="button">Edit</a>
+                                    <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="panel">
+                <table>
+                    <tr>
+                        <th class="normal">
+                            Product Name
+                        </th>
+                        <th class="price">
+                            Price
+                        </th>
+                        <th class="price">
+                            Discount
+                        </th>
+                        <th class="normal">
+                            Discount Start Date
+                        </th>
+                        <th class="normal">
+                            Discount End Date
+                        </th>
+                        <th class="picture">
+                            Picture
+                        </th>
+                        <th>
+                            Operations
+                        </th>
+                    </tr>
+                    {% for p in listproducts %}
+                        {% if p.categoryId == 2 %}
+                            <tr>
+                                <td class="normal">
+                                    {{p.name}}
+                                </td>
+                                <td class="price">
+                                    {{p.price}}
+                                </td>
+                                <td class="price">
+                                    {{p.discount}}
+                                </td>
+                                <td class="normal">
+                                    {{p.discountstartdate}}
+                                </td>
+                                <td class="normal">
+                                    {{p.discountenddate}}
+                                </td>
+                                <td class="picture">
+                                    <img src="/viewphotoproduct/{{p.id}}" id="image" alt="Product Image"/>
+                                </td>
+                                <td>
+                                    <a href="/editproduct/{{p.id}}" class="button">Edit</a>
+                                    <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div> 
+        </div>
+    </article>
+{% endblock %}

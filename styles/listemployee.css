@@ -12,7 +12,9 @@ form{
     height: 35px;
     width: 150px;
     border-radius: 10px;
+    cursor: pointer;
 }
+
 table{
     border-collapse: collapse;
 }
@@ -42,8 +44,7 @@ tr:nth-child(odd) {
     background-color:darkslategrey ;
     border-radius: 5px;
     color: white;
-    padding-left: 10px;
-    
+    padding-left: 10px;   
 }
 a:hover{
     color:yellow;

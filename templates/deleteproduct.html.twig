@@ -1,0 +1,59 @@
+{% extends "master.html.twig" %}
+{% block title %}Delete Employee{% endblock %}
+{% block headExtra %}
+    <link rel="stylesheet" type="text/css" href="/styles/listproduct.css"/>
+{% endblock %}
+{% block content %}  
+    <table>
+        <caption>
+            <h1>You select this Product to delete.Please confirm if you are sure!</h1>
+        </caption>
+        <tr>
+            <th class="normal">
+                Product Name
+            </th>
+            <th class="price">
+                Price
+            </th>
+            <th class="price">
+                Discount
+            </th>
+            <th class="normal">
+                Discount Start Date
+            </th>
+            <th class="normal">
+                Discount End Date
+            </th>
+            <th class="picture">
+                Picture
+            </th>
+            <th>
+                Confirm Delete
+            </th>
+        </tr>
+        <tr>
+            <td class="normal">
+                {{p.name}}
+            </td>
+            <td class="price">
+                {{p.price}}
+            </td>
+            <td class="price">
+                {{p.discount}}
+            </td>
+            <td class="normal">
+                {{p.discountstartdate}}
+            </td>
+            <td class="normal">
+                {{p.discountenddate}}
+            </td>
+            <td class="picture">
+                <img src="/viewphotoproduct/{{p.id}}" id="image" alt="Product Image"/>
+            </td>
+            <td>
+                <a href="/deleteproduct/delete/{{p.id}}" class="button">Delete</a>
+                <a href="/listproducts" class="button">Cancel</a>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

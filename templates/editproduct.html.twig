@@ -1,5 +1,5 @@
 {% extends "master.html.twig" %}
-{% block title %}Add Product{% endblock %}
+{% block title %}Edit Product{% endblock %}
 {% block headExtra %}
     <link rel="stylesheet" type="text/css" href="/styles/addEmployee.css"/>
     <script type="text/javascript" src="/scripts/addproduct.js"></script>
@@ -13,7 +13,7 @@
         {% endif %}
         <table>
             <caption>
-                <h1>Add a Product</h1>
+                <h1>Edit a Product</h1>
             </caption>
             <tr>
                 <td class="labels">
@@ -29,7 +29,7 @@
                     <input type="text" id="discount" name="discount" required value="{{v.discount}}" placeholder="Only float with dot !"  onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode == 46 || event.charCode == 0"/>
                 </td>
                 <td rowspan="4">
-                    <img src="images/product.jpg" alt="product pic" id="img"/>
+                    <img src="/viewphotoproduct/{{v.id}}" alt="product pic" id="img"/>
                 </td>
             </tr>
             <tr>
@@ -43,7 +43,7 @@
                     <label for="startdate">start from:</label>
                 </td>
                 <td>
-                    <input type="date" id="startdate" name="startdate" required />
+                    <input type="text" id="startdate" name="startdate" value="{{v.discountstartdate}}" required />
                 </td>
             </tr>
             <tr>
@@ -52,22 +52,29 @@
                     <label for="category">Category:</label>
                 </td>
                 <td>
-                    <select name="category" id="category">
-                        <option value="software">Software</option>
-                        <option value="hardware">Hardware</option>
-                    </select>
+                    {% if v.categoryId == 1 %}
+                        <select name="category" id="category">
+                            <option value="software" selected>Software</option>
+                            <option value="hardware">Hardware</option>
+                        </select>
+                    {% else %}
+                        <select name="category" id="category">
+                            <option value="software">Software</option>
+                            <option value="hardware" selected>Hardware</option>
+                        </select>
+                    {% endif %}
                 </td>
                 <td class="labels">
                     <label for="enddate">End on:</label>
                 </td>
                 <td>
-                    <input type="date" id="enddate" name="enddate" required />
+                    <input type="text" id="enddate" name="enddate" value="{{v.discountenddate}}" required />
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="submit" value="Add Product" style="width:130px;height:45px;" />
-                    <input type="reset" value="Clear The Form" style="width:130px;height:45px;" />
+                    <input type="submit" value="Edit Product" style="width:130px;height:45px;" />
+                    <input type="reset" value="Clear The Form" style="width:130px;height:45px;" disabled/>
                 </td>
                 <td colspan="2">
                     <input type="file" name="image" onchange="readURL(this);"  style="width:260px;height:25px;" />
