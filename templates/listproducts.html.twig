@@ -2,19 +2,20 @@
 {% block title %}All Products{% endblock %}
 {% block headExtra %}
     <link href="/styles/listproduct.css" type="text/css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/scripts/listproduct.js"></script>
 {% endblock %}
 {% block content %}
     <article class="tabs">
-
-        <input checked id="one" name="tabs" type="radio">
+        <input id="one" name="tabs" type="radio" value="One" onclick="myFunction1();">
         <label for="one">Software</label>
 
-        <input id="two" name="tabs" type="radio" value="Two">
+        <input id="two" name="tabs" type="radio" value="Two" onclick="myFunction2();">
         <label for="two">Hardware</label>
         <a href="/addproduct" class="button">Add Product</a>
         <div class="panels">
             <div class="panel">
-                <table>
+                <table id="tblsoft">
                     <tr>
                         <th class="normal">
                             Product Name
@@ -62,6 +63,7 @@
                                 <td>
                                     <a href="/editproduct/{{p.id}}" class="button">Edit</a>
                                     <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                    <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
                                 </td>
                             </tr>
                         {% endif %}
@@ -69,7 +71,7 @@
                 </table>
             </div>
             <div class="panel">
-                <table>
+                <table id="tblhard">
                     <tr>
                         <th class="normal">
                             Product Name
@@ -117,6 +119,7 @@
                                 <td>
                                     <a href="/editproduct/{{p.id}}" class="button">Edit</a>
                                     <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                    <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
                                 </td>
                             </tr>
                         {% endif %}

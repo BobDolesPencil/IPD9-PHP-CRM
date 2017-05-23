@@ -71,7 +71,6 @@ header h1 {
     min-width: 65%;
     min-height:80%;
     margin: 0;
-    overflow: auto;
 }
 #right {
     float: left;

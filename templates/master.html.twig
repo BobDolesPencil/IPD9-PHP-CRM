@@ -5,13 +5,10 @@
         <meta charset="utf-8" />
         <link href="/styles/master.css" type="text/css" rel="stylesheet" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <script>
-
-        </script>
         <title>{% block title %}{% endblock %}</title>
     {% block headExtra %}{% endblock %}
 </head>
-<body onload="startTime()">
+<body>
     <header>      
         <h1>
             Cutomer Relationship Managment
@@ -33,7 +30,7 @@
                     <a href="/listproducts">Products</a>                    
                 </li>
                 <li>
-                    <a href="#">Order</a>                    
+                    <a href="/viewcart">View Cart</a>                    
                 </li>
                 <li>
                     <a href="#">Reports</a>             

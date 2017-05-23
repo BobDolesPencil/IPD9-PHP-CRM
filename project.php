@@ -13,34 +13,8 @@ $log = new Logger('main');
 $log->pushHandler(new StreamHandler('logs/everything.log', Logger::DEBUG));
 $log->pushHandler(new StreamHandler('logs/errors.log', Logger::ERROR));
 
-//connect to Database
-DB::$host = '127.0.0.1';
-DB::$user = 'crm'; //change
-DB::$password = '2u1VGtbINtmgiE9M'; //change
-DB::$dbName = 'crm'; //change
-DB::$port = 3333;
-DB::$encoding = 'utf8';
-
-//Database Error Handler
-DB::$error_handler = 'sql_error_handler';
-DB::$nonsql_error_handler = 'nonsql_error_handler';
-
-function nonsql_error_handler($params) {
-    global $app, $log;
-    $log->error("Database error: " . $params['error']);
-    http_response_code(500);
-    $app->render('error_internal.html.twig');
-    die;
-}
-
-function sql_error_handler($params) {
-    global $app, $log;
-    $log->error("SQL error: " . $params['error']);
-    $log->error(" in query: " . $params['query']);
-    http_response_code(500);
-    $app->render('error_internal.html.twig');
-    die; // don't want to keep going if a query broke
-}
+//connect to database
+require_once 'localdb.php';
 
 // Slim creation and setup
 $app = new \Slim\Slim(array(
@@ -93,6 +67,7 @@ $app->post('/', function() use ($app) {
 //LogOut
 $app->get('/logout', function() use ($app) {
     unset($_SESSION['user']);
+    $_SESSION['user'] = array();
     $app->render('logout.html.twig');
 });
 ///////////////////////////// All Employee Actions /////////////////////
@@ -501,9 +476,9 @@ $app->post('/editproduct/:id', function($id = 0) use($app) {
         'name' => $name,
         'price' => $price,
         'discount' => $discount,
-        'discountstartdate'=>$startdate,
-        'discountenddate'=>$enddate, 
-        'id'=>$id
+        'discountstartdate' => $startdate,
+        'discountenddate' => $enddate,
+        'id' => $id
     );
     $errorList = array();
     if ($_FILES['image']['size'] == 0) {
@@ -554,9 +529,137 @@ $app->get('/deleteproduct/delete/:id', function($id = 0) use ($app) {
     $app->render('listproducts.html.twig', array(
         'listproducts' => $listallproducts));
 });
-
 /////////////////////////////End of All Products Actions /////////////////////
+///////////////////////////// All Cart Actions /////////////////////
+// Add to Cart
+$app->get('/addtocart/:id', function($id = 0) use ($app) {
+    $quantity = 1;
+    $item = DB::queryFirstRow("SELECT * FROM cartitems WHERE productID=%d AND sessionID=%s", $id, session_id());
+    if ($item) {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+        window.alert('The Item Already exsist!')
+         window.location.href='/listproducts';
+        </SCRIPT>");
+    } else {
+        DB::insert('cartitems', array(
+            'sessionID' => session_id(),
+            'productID' => $id,
+            'quantity' => $quantity
+        ));
+        $listallproducts = DB::query("SELECT * FROM products");
+        $app->render('listproducts.html.twig', array(
+            'listproducts' => $listallproducts));
+    }
+});
+//List of all cart Items
+$app->get('/viewcart', function()use($app) {
+    $cartitems = DB::query("SELECT * FROM products INNER JOIN cartitems ON products.id = cartitems.productID");
+    if ($cartitems) {
+        $app->render('cartlistitems.html.twig', array(
+            'items' => $cartitems
+        ));
+    } else {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+        window.alert('Cart is empty!Perches some Item.')
+         window.location.href='/listproducts';
+        </SCRIPT>");
+    }
+});
+//Delete from cart
+$app->get('/deletefromcart/:id', function($id = 0) use($app) {
+    DB::delete('cartitems', 'productID=%i', $id);
+    $cartitems = DB::query("SELECT * FROM products INNER JOIN cartitems ON products.id = cartitems.productID");
+    if ($cartitems) {
+        $app->render('cartlistitems.html.twig', array(
+            'items' => $cartitems
+        ));
+    } else {
+        $listallproducts = DB::query("SELECT * FROM products");
+        $app->render('listproducts.html.twig', array(
+            'listproducts' => $listallproducts));
+    }
+});
+//Update qty in cart
+$app->get('/cart/update/:productID/:quantity', function($productID, $quantity) {
+    $cartitem = DB::queryFirstRow("SELECT * from cartitems WHERE productID=%i", $productID);
+    DB::update('cartitems', array('quantity' => $quantity), 'cartitems.ID=%d AND cartitems.sessionID=%s', $cartitem['id'], session_id());
+    echo json_encode(DB::affectedRows() == 1);
+});
+//place order
+// order handling
+$app->map('/order', function () use ($app) {
+    $totalBeforeTax = DB::queryFirstField(
+                    "SELECT SUM(products.price * cartitems.quantity) "
+                    . " FROM cartitems, products "
+                    . " WHERE cartitems.sessionID=%s AND cartitems.productID=products.ID", session_id());
+// TODO: properly compute taxes, shipping, ...
+    $shippingBeforeTax = 15.00;
+    $taxes = ($totalBeforeTax + $shippingBeforeTax) * 0.15;
+    $totalWithShippingAndTaxes = $totalBeforeTax + $shippingBeforeTax + $taxes;
 
+    if ($app->request->isGet()) {
+        $app->render('placeorder.html.twig', array(
+            'totalBeforeTax' => number_format($totalBeforeTax, 2),
+            'shippingBeforeTax' => number_format($shippingBeforeTax, 2),
+            'taxes' => number_format($taxes, 2),
+            'totalWithShippingAndTaxes' => number_format($totalWithShippingAndTaxes, 2)
+        ));
+    } else {// SUCCESSFUL SUBMISSION
+        $custID = $app->request->post('customerid');
+        DB::$error_handler = FALSE;
+        DB::$throw_exception_on_error = TRUE;
+// PLACE THE ORDER
+        try {
+            DB::startTransaction();
+// 1. create summary record in 'orders' table (insert)
+            DB::insert('orders', array(
+                'employeeID' => $_SESSION['user'] ? $_SESSION['user']['id'] : NULL,
+                'customerID' => $custID,
+                'totalBeforeTax' => $totalBeforeTax,
+                'shippingBeforeTax' => $shippingBeforeTax,
+                'taxes' => $taxes,
+                'totalWithShippingAndTaxes' => $totalWithShippingAndTaxes,
+                'dateTimePlaced' => date('Y-m-d H:i:s')
+            ));
+            $orderID = DB::insertId();
+// 2. copy all records from cartitems to 'orderitems' (select & insert)
+            $cartitemList = DB::query(
+                            "SELECT productID as origProductID, quantity, price"
+                            . " FROM cartitems, products "
+                            . " WHERE cartitems.productID = products.ID AND sessionID=%s", session_id());
+// add orderID to every sub-array (element) in $cartitemList
+            array_walk($cartitemList, function(&$item, $key) use ($orderID) {
+                $item['orderID'] = $orderID;
+            });
+            /* This is the same as the following foreach loop:
+              foreach ($cartitemList as &$item) {
+              $item['orderID'] = $orderID;
+              } */
+            DB::insert('orderitems', $cartitemList);
+// 3. delete cartitems for this user's session (delete)
+            DB::delete('cartitems', "sessionID=%s", session_id());
+            DB::commit();
+// TODO: send a confirmation email
+            /*
+              $emailHtml = $app->view()->getEnvironment()->render('email_order.html.twig');
+              $headers = "MIME-Version: 1.0\r\n";
+              $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+              mail($email, "Order " .$orderID . " placed ", $emailHtml, $headers);
+             */
+//
+            $listallproducts = DB::query("SELECT * FROM products");
+            $app->render('listproducts.html.twig', array(
+                'listproducts' => $listallproducts));
+        } catch (MeekroDBException $e) {
+            DB::rollback();
+            sql_error_handler(array(
+                'error' => $e->getMessage(),
+                'query' => $e->getQuery()
+            ));
+        }
+    }
+})->via('GET', 'POST');
+/////////////////////////////End of All Cart Actions /////////////////////
 $app->run();
 
 
