@@ -70,6 +70,103 @@ $app->get('/logout', function() use ($app) {
     $_SESSION['user'] = array();
     $app->render('logout.html.twig');
 });
+// PASSWOR RESET
+function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+$app->map('/passreset', function () use ($app, $log) {
+    // Alternative to cron-scheduled cleanup
+    if (rand(1,1000) == 111) {
+        // TODO: do the cleanup 1 in 1000 accessed to /passreset URL
+    }
+    if ($app->request()->isGet()) {
+        $app->render('passreset.html.twig');
+    } else {
+        $username = $app->request()->post('username');
+        $user = DB::queryFirstRow("SELECT * FROM employee WHERE username=%s", $username);
+        $email = $user['email'];
+        if ($user) {
+            $app->render('passreset_success.html.twig');
+            $secretToken = generateRandomString(50);
+            // VERSION 1: delete and insert
+            /*
+              DB::delete('passresets', 'userID=%d', $user['ID']);
+              DB::insert('passresets', array(
+              'userID' => $user['ID'],
+              'secretToken' => $secretToken,
+              'expiryDateTime' => date("Y-m-d H:i:s", strtotime("+5 hours"))
+              )); */
+            // VERSION 2: insert-update TODO
+            DB::insertUpdate('passresets', array(
+                'employeeID' => $user['id'],
+                'secretToken' => $secretToken,
+                'expiryDateTime' => date("Y-m-d H:i:s", strtotime("+5 minutes"))
+            ));
+            // email user
+            $url = 'http://' . $_SERVER['SERVER_NAME'] . '/passreset/' . $secretToken;
+            $html = $app->view()->render('email_passreset.html.twig', array(
+                'name' => $user['firstname'],
+                'url' => $url
+            ));
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers.= "Content-Type: text/html; charset=UTF-8\r\n";
+            $headers.= "From: Noreply <noreply@ipd8.info>\r\n";
+            $headers.= "To: " . htmlentities($user['firstname']) . " <" . $email . ">\r\n";
+
+            mail($email, "Password reset from SlimShop", $html, $headers);
+            $log->info("Password reset for $email email sent");
+        } else {
+            $app->render('passreset.html.twig', array('error' => TRUE));
+        }
+    }
+})->via('GET', 'POST');
+$app->map('/passreset/:secretToken', function($secretToken) use ($app,$log) {
+    $row = DB::queryFirstRow("SELECT * FROM passresets WHERE secretToken=%s", $secretToken);
+    if (!$row) {
+        $app->render('passreset_notfound_expired.html.twig');
+        return;
+    }
+    if (strtotime($row['expiryDateTime']) < time()) {
+        $app->render('passreset_notfound_expired.html.twig');
+        return;
+    }
+    //
+    if ($app->request()->isGet()) {
+        $app->render('passreset_form.html.twig');
+    } else {
+        $pass1 = $app->request()->post('pass1');
+        $pass2 = $app->request()->post('pass2');
+        // TODO: verify password quality and that pass1 matches pass2
+        $errorList = array();
+        $msg = verifyPassword($pass1);
+        if ($msg !== TRUE) {
+            array_push($errorList, $msg);
+        } else if ($pass1 != $pass2) {
+            array_push($errorList, "Passwords don't match");
+        }
+        //
+        if ($errorList) {
+            $app->render('passreset_form.html.twig', array(
+                'errorList' => $errorList
+            ));
+        } else {
+            // success - reset the password
+            DB::update('employee', array(
+                'password' => password_hash($pass1, CRYPT_BLOWFISH)
+                    ), "ID=%d", $row['employeeID']);
+            DB::delete('passresets','secretToken=%s', $secretToken);
+            $app->render('passreset_form_success.html.twig');
+            $log->info("Password reset completed for " . $row['email'] . " uid=". $row['employeeID']);
+        }
+    }
+})->via('GET', 'POST');
 ///////////////////////////// All Employee Actions /////////////////////
 //List All Employees
 $app->get('/listemployee', function() use($app) {

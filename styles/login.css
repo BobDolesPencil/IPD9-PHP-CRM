@@ -37,7 +37,7 @@ main table{
     width: 250px;
 }
 
-#btnLogin {
+#btnLogin{
     color:white;
     height: 40px;
     width: 100px;
@@ -52,6 +52,7 @@ main table{
 #btnLogin:hover{
     cursor:pointer;
 }
+
  #forgetpass{
      padding-left:30px;
      color:white;
