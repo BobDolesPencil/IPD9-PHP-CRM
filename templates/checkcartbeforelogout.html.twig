@@ -1,0 +1,54 @@
+{% extends "master.html.twig" %}
+{% block title %}Check cart before logout{% endblock %}
+{% block headExtra %}
+    <!-- <link rel="stylesheet" type="text/css" href="/styles/listemployee.css"/>-->
+    <style>
+        #thisheader{
+            margin-top: 100px;
+        }
+        table{
+            float: right;
+            margin-right: 100px;
+        }
+        .button{
+            width: 120px;
+            height: 30px;
+            text-decoration: none;
+            display: inline-block;
+            background-color:darkslategrey ;
+            border-radius: 5px;
+            color: white;
+            padding-left: 10px;
+            padding-top: 10px;
+            text-align: center;
+
+        }
+        a:hover{
+            color:yellow;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        function update(e) {
+            e.preventDefault();
+            $.get("/checkcartbeforelogout", function () {
+                console.log("Cart cleared");
+                window.location.replace("/logout");
+            });
+        }
+    </script>
+
+{% endblock %}
+{% block content %}       
+    <h1 id="thisheader">You Have Some items in cart. They will be removed if you logout!</h1>
+    <table>     
+        <tr>
+            <td>
+                <a href="" class="button" onclick="update(event);">Logout</a>       
+            </td>
+            <td>
+                <a href="/viewcart" class="button">Cancel</a>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

@@ -60,17 +60,32 @@ $app->post('/', function() use ($app) {
         unset($user['password']);
         $_SESSION['user'] = $user;
         $listallemployee = DB::query("SELECT * FROM employee");
+        $twig = $app->view()->getEnvironment();
+        $twig->addGlobal('user', $_SESSION['user']);
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
     }
 });
 //LogOut
 $app->get('/logout', function() use ($app) {
-    unset($_SESSION['user']);
-    $_SESSION['user'] = array();
-    $app->render('logout.html.twig');
+    //check cart before logout
+    $cartitems = DB::query("SELECT * from cartitems WHERE sessionID=%s", session_id());
+    if ($cartitems) {
+        $app->render('checkcartbeforelogout.html.twig');
+    } else {
+        unset($_SESSION['user']);
+        $_SESSION['user'] = array();
+        $twig = $app->view()->getEnvironment();
+        $twig->addGlobal('user', $_SESSION['user']);
+        $app->render('logout.html.twig');
+    }
 });
-// PASSWOR RESET
+//clear cart before logout
+$app->get('/checkcartbeforelogout', function() {
+    DB::delete('cartitems', "sessionID=%s", session_id());
+});
+
+// PASSWOR RESET on login
 function generateRandomString($length = 10) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
@@ -83,7 +98,7 @@ function generateRandomString($length = 10) {
 
 $app->map('/passreset', function () use ($app, $log) {
     // Alternative to cron-scheduled cleanup
-    if (rand(1,1000) == 111) {
+    if (rand(1, 1000) == 111) {
         // TODO: do the cleanup 1 in 1000 accessed to /passreset URL
     }
     if ($app->request()->isGet()) {
@@ -116,9 +131,9 @@ $app->map('/passreset', function () use ($app, $log) {
                 'url' => $url
             ));
             $headers = "MIME-Version: 1.0\r\n";
-            $headers.= "Content-Type: text/html; charset=UTF-8\r\n";
-            $headers.= "From: Noreply <noreply@ipd8.info>\r\n";
-            $headers.= "To: " . htmlentities($user['firstname']) . " <" . $email . ">\r\n";
+            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: Noreply <noreply@ipd8.info>\r\n";
+            $headers .= "To: " . htmlentities($user['firstname']) . " <" . $email . ">\r\n";
 
             mail($email, "Password reset from SlimShop", $html, $headers);
             $log->info("Password reset for $email email sent");
@@ -127,7 +142,7 @@ $app->map('/passreset', function () use ($app, $log) {
         }
     }
 })->via('GET', 'POST');
-$app->map('/passreset/:secretToken', function($secretToken) use ($app,$log) {
+$app->map('/passreset/:secretToken', function($secretToken) use ($app, $log) {
     $row = DB::queryFirstRow("SELECT * FROM passresets WHERE secretToken=%s", $secretToken);
     if (!$row) {
         $app->render('passreset_notfound_expired.html.twig');
@@ -161,12 +176,43 @@ $app->map('/passreset/:secretToken', function($secretToken) use ($app,$log) {
             DB::update('employee', array(
                 'password' => password_hash($pass1, CRYPT_BLOWFISH)
                     ), "ID=%d", $row['employeeID']);
-            DB::delete('passresets','secretToken=%s', $secretToken);
+            DB::delete('passresets', 'secretToken=%s', $secretToken);
             $app->render('passreset_form_success.html.twig');
-            $log->info("Password reset completed for " . $row['email'] . " uid=". $row['employeeID']);
+            $log->info("Password reset completed for " . $row['email'] . " uid=" . $row['employeeID']);
         }
     }
 })->via('GET', 'POST');
+//Change password in app
+$app->get('/changepassword', function()use($app) {
+    $app->render('changepassword.html.twig');
+});
+$app->post('/changepassword', function()use($app) {
+    $oldpass = $app->request()->post('oldpass');
+    $newpass = $app->request()->post('newpass1');
+    $user = DB::queryFirstRow("SELECT * FROM employee WHERE username=%s", $_SESSION['user']['username']);
+    $error = false;
+    if (!$user) {
+        $error = true;
+    } else {
+        if ($user['password'] != $oldpass) {
+            $error = true;
+        }
+        if($newpass == $oldpass){
+            $error = true;
+        }
+    }
+    if ($error) {
+        $app->render('changepassword.html.twig', array("error" => true));
+    } else {
+        DB::update('employee', array(
+            'password' => $newpass
+                ), "username=%s", $_SESSION['user']['username']);
+        $app->flashNow('passchange', 'Password Changed successfully.');
+        $listallemployee = DB::query("SELECT * FROM employee");
+        $app->render('listemployee.html.twig', array(
+            'listemployees' => $listallemployee));
+    }
+});
 ///////////////////////////// All Employee Actions /////////////////////
 //List All Employees
 $app->get('/listemployee', function() use($app) {
@@ -244,7 +290,7 @@ $app->post('/addemployee', function() use($app) {
             'image' => $imageBinaryData,
             'mimetype' => $mimeType
         ));
-        $app->flash('addemployee', 'Employee Added successfully.');
+        $app->flashNow('addemployee', 'Employee Added successfully.');
         $listallemployee = DB::query("SELECT * FROM employee");
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
@@ -258,13 +304,16 @@ $app->post('/addemployee', function() use($app) {
 });
 //Edit Employee
 $app->get('/editemployee/:id', function($id = 0) use($app) {
-    /* if (($_SESSION['user']['title'] != "manager")) {
-      $app->render('forbidden.html.twig');
-      return;
-      } */
-    $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
-    $app->render("editemployee.html.twig", array(
-        'v' => $valuelist));
+    if (($_SESSION['user']['title'] != "Manager")) {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+         window.alert('You have No Permission to do this Operation!.')
+         window.location.href='/listemployee';
+        </SCRIPT>");
+    } else {
+        $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
+        $app->render("editemployee.html.twig", array(
+            'v' => $valuelist));
+    }
 });
 $app->post('/editemployee/:id', function($id = 0) use($app) {
 
@@ -299,18 +348,6 @@ $app->post('/editemployee/:id', function($id = 0) use($app) {
 
     $errorList = array();
     if ($_FILES['image']['size'] == 0) {
-        array_push($errorList, "Image must be uploaded. You can not leave it empty");
-    }
-    if ($image['error'] == 0) {
-        $imageInfo = getimagesize($image["tmp_name"]);
-        if (!$imageInfo) {
-            array_push($errorList, "File does not look like an valid image");
-        }
-    }
-    // receive data and insert
-    if (!$errorList) {
-        $imageBinaryData = file_get_contents($image['tmp_name']);
-        $mimeType = mime_content_type($image['tmp_name']);
         DB::update('employee', array(
             'firstname' => $fname,
             'lastname' => $lname,
@@ -324,32 +361,70 @@ $app->post('/editemployee/:id', function($id = 0) use($app) {
             'phone' => $phone,
             'title' => $title,
             'username' => $username,
-            'password' => $pass,
-            'image' => $imageBinaryData,
-            'mimetype' => $mimeType
+            'password' => $pass
                 ), "id=%i", $id);
-        $app->flash('editemployee', 'Employee Edited successfully.');
+        $app->flashNow('editemployee', 'Employee Edited successfully.');
         $listallemployee = DB::query("SELECT * FROM employee");
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
     } else {
-        //keep values entered on failed submission
-        $app->render('editemployee.html.twig', array(
-            'v' => $valuelist,
-            'error' => $errorList
-        ));
+        if ($image['error'] == 0) {
+            $imageInfo = getimagesize($image["tmp_name"]);
+            if (!$imageInfo) {
+                array_push($errorList, "File does not look like an valid image");
+            }
+        }
+        // receive data and insert
+        if (!$errorList) {
+            $imageBinaryData = file_get_contents($image['tmp_name']);
+            $mimeType = mime_content_type($image['tmp_name']);
+            DB::update('employee', array(
+                'firstname' => $fname,
+                'lastname' => $lname,
+                'hireDate' => $hiredate,
+                'birthDate' => $birthdate,
+                'address' => $address,
+                'appNo' => $appNo,
+                'postalcode' => $postalcode,
+                'country' => $country,
+                'email' => $email,
+                'phone' => $phone,
+                'title' => $title,
+                'username' => $username,
+                'password' => $pass,
+                'image' => $imageBinaryData,
+                'mimetype' => $mimeType
+                    ), "id=%i", $id);
+            $app->flashNow('editemployee', 'Employee Edited successfully.');
+            $listallemployee = DB::query("SELECT * FROM employee");
+            $app->render('listemployee.html.twig', array(
+                'listemployees' => $listallemployee));
+        } else {
+            //keep values entered on failed submission
+            $app->render('editemployee.html.twig', array(
+                'v' => $valuelist,
+                'error' => $errorList
+            ));
+        }
     }
 });
 // Delete Employee
 $app->get('/deleteemployee/:id', function($id = 0) use ($app) {
-    $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
-    $app->flash('deleteemployee', 'Employee Deleted successfully.');
-    $app->render('deleteemployee.html.twig', array(
-        'employee' => $employee
-    ));
+    if (($_SESSION['user']['title'] != "Manager")) {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+        window.alert('You have No Permission to do this Operation!.')
+         window.location.href='/listemployee';
+        </SCRIPT>");
+    } else {
+        $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
+        $app->render('deleteemployee.html.twig', array(
+            'employee' => $employee
+        ));
+    }
 });
 $app->get('/deleteemployee/delete/:id', function($id = 0) use ($app) {
     DB::delete('employee', 'id=%i', $id);
+    $app->flashNow('deleteemployee', 'Employee Deleted successfully.');
     $listallemployee = DB::query("SELECT * FROM employee");
     $app->render('listemployee.html.twig', array(
         'listemployees' => $listallemployee));
@@ -400,6 +475,7 @@ $app->post('/addcustomer', function() use ($app) {
             'email' => $email,
             'phone' => $phone,
         ));
+        $app->flashNow('addcustomer', 'Customer Added successfully.');
         $listallcustomers = DB::query("SELECT * FROM customers");
         $app->render('listcustomers.html.twig', array(
             'listcustomers' => $listallcustomers));
@@ -413,16 +489,11 @@ $app->post('/addcustomer', function() use ($app) {
 });
 //Edit Customer
 $app->get('/editcustomer/:id', function($id = 0) use($app) {
-    /* if (($_SESSION['user']['title'] != "manager")) {
-      $app->render('forbidden.html.twig');
-      return;
-      } */
     $valuelist = DB::queryFirstRow("SELECT * FROM customers WHERE id=%i", $id);
     $app->render("editcustomer.html.twig", array(
         'v' => $valuelist));
 });
 $app->post('/editcustomer/:id', function($id = 0) use($app) {
-
     $fname = $app->request()->post('firstname');
     $lname = $app->request()->post('lastname');
     $birthdate = $app->request()->post('birthdate');
@@ -457,7 +528,7 @@ $app->post('/editcustomer/:id', function($id = 0) use($app) {
             'email' => $email,
             'phone' => $phone
                 ), "id=%i", $id);
-        $app->flash('editcustomer', 'Customer Edited successfully.');
+        $app->flashNow('editcustomer', 'Customer Edited successfully.');
         $listallcustomers = DB::query("SELECT * FROM customers");
         $app->render('listcustomers.html.twig', array(
             'listcustomers' => $listallcustomers));
@@ -472,13 +543,13 @@ $app->post('/editcustomer/:id', function($id = 0) use($app) {
 // Delete Customer
 $app->get('/deletecustomer/:id', function($id = 0) use ($app) {
     $customer = DB::queryFirstRow('SELECT * FROM customers WHERE id=%i', $id);
-    $app->flash('deletecustomers', 'Customer Deleted successfully.');
     $app->render('deletecustomer.html.twig', array(
         'customer' => $customer
     ));
 });
 $app->get('/deletecustomer/delete/:id', function($id = 0) use ($app) {
     DB::delete('customers', 'id=%i', $id);
+    $app->flashNow('deletecustomer', 'Customer Deleted successfully.');
     $listallcustomers = DB::query("SELECT * FROM customers");
     $app->render('listcustomers.html.twig', array(
         'listcustomers' => $listallcustomers));
@@ -537,7 +608,7 @@ $app->post('/addproduct', function() use ($app) {
             'image' => $imageBinaryData,
             'mimetype' => $mimeType
         ));
-        $app->flash('addproduct', 'Product Added Successfully');
+        $app->flashNow('addproduct', 'Product Added Successfully');
         $listallproducts = DB::query("SELECT * FROM products");
         $app->render('listproducts.html.twig', array(
             'listproducts' => $listallproducts));
@@ -551,13 +622,16 @@ $app->post('/addproduct', function() use ($app) {
 });
 //Edit Product
 $app->get('/editproduct/:id', function($id = 0) use($app) {
-    /* if (($_SESSION['user']['title'] != "manager")) {
-      $app->render('forbidden.html.twig');
-      return;
-      } */
-    $valuelist = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
-    $app->render("editproduct.html.twig", array(
-        'v' => $valuelist));
+    if (($_SESSION['user']['title'] != "Manager")) {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+         window.alert('You have No Permission to do this Operation!.')
+         window.location.href='/listproducts';
+        </SCRIPT>");
+    } else {
+        $valuelist = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
+        $app->render("editproduct.html.twig", array(
+            'v' => $valuelist));
+    }
 });
 $app->post('/editproduct/:id', function($id = 0) use($app) {
 
@@ -579,49 +653,68 @@ $app->post('/editproduct/:id', function($id = 0) use($app) {
     );
     $errorList = array();
     if ($_FILES['image']['size'] == 0) {
-        array_push($errorList, "Image must be uploaded. You can not leave it empty");
-    }
-    if ($image['error'] == 0) {
-        $imageInfo = getimagesize($image["tmp_name"]);
-        if (!$imageInfo) {
-            array_push($errorList, "File does not look like an valid image");
-        }
-    }
-    if (!$errorList) {
-        $imageBinaryData = file_get_contents($image['tmp_name']);
-        $mimeType = mime_content_type($image['tmp_name']);
         DB::update('products', array(
             'name' => $name,
             'price' => $price,
             'categoryId' => $catid['id'],
             'discount' => $discount,
             'discountstartdate' => $startdate,
-            'discountenddate' => $enddate,
-            'image' => $imageBinaryData,
-            'mimetype' => $mimeType
+            'discountenddate' => $enddate
                 ), "id=%i", $id);
-        $app->flash('editproduct', 'Product Edited successfully.');
+        $app->flashNow('editproduct', 'Product Edited successfully.');
         $listallproducts = DB::query("SELECT * FROM products");
         $app->render('listproducts.html.twig', array(
             'listproducts' => $listallproducts));
     } else {
-        //keep values entered on failed submission
-        $app->render('editproduct.html.twig', array(
-            'v' => $valuelist,
-            'error' => $errorList
+        if ($image['error'] == 0) {
+            $imageInfo = getimagesize($image["tmp_name"]);
+            if (!$imageInfo) {
+                array_push($errorList, "File does not look like an valid image");
+            }
+        }
+        if (!$errorList) {
+            $imageBinaryData = file_get_contents($image['tmp_name']);
+            $mimeType = mime_content_type($image['tmp_name']);
+            DB::update('products', array(
+                'name' => $name,
+                'price' => $price,
+                'categoryId' => $catid['id'],
+                'discount' => $discount,
+                'discountstartdate' => $startdate,
+                'discountenddate' => $enddate,
+                'image' => $imageBinaryData,
+                'mimetype' => $mimeType
+                    ), "id=%i", $id);
+            $app->flashNow('editproduct', 'Product Edited successfully.');
+            $listallproducts = DB::query("SELECT * FROM products");
+            $app->render('listproducts.html.twig', array(
+                'listproducts' => $listallproducts));
+        } else {
+            //keep values entered on failed submission
+            $app->render('editproduct.html.twig', array(
+                'v' => $valuelist,
+                'error' => $errorList
+            ));
+        }
+    }
+});
+// Delete Product
+$app->get('/deleteproduct/:id', function($id = 0) use ($app) {
+    if (($_SESSION['user']['title'] != "Manager")) {
+        echo ("<SCRIPT LANGUAGE='JavaScript'>
+         window.alert('You have No Permission to do this Operation!.')
+         window.location.href='/listproducts';
+        </SCRIPT>");
+    } else {
+        $product = DB::queryFirstRow('SELECT * FROM products WHERE id=%i', $id);
+        $app->render('deleteproduct.html.twig', array(
+            'p' => $product
         ));
     }
 });
-// Delete Customer
-$app->get('/deleteproduct/:id', function($id = 0) use ($app) {
-    $product = DB::queryFirstRow('SELECT * FROM products WHERE id=%i', $id);
-    $app->flash('deleteproduct', 'Product Deleted successfully.');
-    $app->render('deleteproduct.html.twig', array(
-        'p' => $product
-    ));
-});
 $app->get('/deleteproduct/delete/:id', function($id = 0) use ($app) {
     DB::delete('products', 'id=%i', $id);
+    $app->flashNow('deleteproduct', 'Product Deleted successfully.');
     $listallproducts = DB::query("SELECT * FROM products");
     $app->render('listproducts.html.twig', array(
         'listproducts' => $listallproducts));
@@ -643,6 +736,7 @@ $app->get('/addtocart/:id', function($id = 0) use ($app) {
             'productID' => $id,
             'quantity' => $quantity
         ));
+        $app->flashNow('addproduct', 'Product Added to cart Successfully');
         $listallproducts = DB::query("SELECT * FROM products");
         $app->render('listproducts.html.twig', array(
             'listproducts' => $listallproducts));
@@ -650,7 +744,7 @@ $app->get('/addtocart/:id', function($id = 0) use ($app) {
 });
 //List of all cart Items
 $app->get('/viewcart', function()use($app) {
-    $cartitems = DB::query("SELECT * FROM products INNER JOIN cartitems ON products.id = cartitems.productID");
+    $cartitems = DB::query("SELECT * FROM products INNER JOIN cartitems ON products.id = cartitems.productID AND sessionID=%s", session_id());
     if ($cartitems) {
         $app->render('cartlistitems.html.twig', array(
             'items' => $cartitems
@@ -683,7 +777,6 @@ $app->get('/cart/update/:productID/:quantity', function($productID, $quantity) {
     echo json_encode(DB::affectedRows() == 1);
 });
 //place order
-// order handling
 $app->map('/order', function () use ($app) {
     $totalBeforeTax = DB::queryFirstField(
                     "SELECT SUM(products.price * cartitems.quantity) "

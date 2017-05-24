@@ -129,3 +129,14 @@
         </div>
     </article>
 {% endblock %}
+{% block leftaside %}
+    {% if flash.addcustomer %}
+        <h4>{{flash.addcustomer}}</h4>
+    {% endif %}
+    {% if flash.editcustomer %}
+        <h4>{{flash.editcustomer}}</h4>
+    {% endif %}
+    {% if flash.deletecustomer %}
+        <h4>{{flash.deletecustomer}}</h4>
+    {% endif %}
+{% endblock %}
