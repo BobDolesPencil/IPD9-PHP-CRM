@@ -55,7 +55,7 @@
                             </td>
                             <td class="normal">
                                 <button onclick="decrement({{p.id}});">-</button>
-                                <input type="number" name="quantity{{p.id}}" value="1" style="width:30px; background-color: navy; color: white; opacity: 1;"/>
+                                <input type="number" name="quantity{{p.id}}" value="{{p.quantity}}" style="width:30px; background-color: navy; color: white; opacity: 1;"/>
                                 <button onclick="increment({{p.id}});">+</button>
                                 <a href="" class="updateLink" style="text-decoration:none;" id="update{{p.id}}" onclick="update(event,{{p.id}});">update</a>
                             </td>

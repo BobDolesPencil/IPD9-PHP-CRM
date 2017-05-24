@@ -15,6 +15,27 @@ $log->pushHandler(new StreamHandler('logs/errors.log', Logger::ERROR));
 
 //connect to database
 require_once 'localdb.php';
+//Database Error Handler
+DB::$error_handler = 'sql_error_handler';
+DB::$nonsql_error_handler = 'nonsql_error_handler';
+
+function nonsql_error_handler($params) {
+    global $app, $log;
+    $log->error("Database error: " . $params['error']);
+    http_response_code(500);
+    $app->render('error_internal.html.twig');
+    die;
+}
+
+function sql_error_handler($params) {
+    global $app, $log;
+    $log->error("SQL error: " . $params['error']);
+    $log->error(" in query: " . $params['query']);
+    http_response_code(500);
+    $app->render('error_internal.html.twig');
+    die; // don't want to keep going if a query broke
+}
+
 
 // Slim creation and setup
 $app = new \Slim\Slim(array(
@@ -772,8 +793,8 @@ $app->get('/deletefromcart/:id', function($id = 0) use($app) {
 });
 //Update qty in cart
 $app->get('/cart/update/:productID/:quantity', function($productID, $quantity) {
-    $cartitem = DB::queryFirstRow("SELECT * from cartitems WHERE productID=%i", $productID);
-    DB::update('cartitems', array('quantity' => $quantity), 'cartitems.ID=%d AND cartitems.sessionID=%s', $cartitem['id'], session_id());
+    $cartitem = DB::queryFirstRow("SELECT * from cartitems WHERE productID=%i AND cartitems.sessionID=%s", $productID, session_id());
+    DB::update('cartitems', array('quantity' => $quantity), 'ID=%i AND sessionID=%s', $cartitem['ID'], session_id());
     echo json_encode(DB::affectedRows() == 1);
 });
 //place order
