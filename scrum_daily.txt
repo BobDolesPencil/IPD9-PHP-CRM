@@ -30,5 +30,59 @@ Aliakbar
 Sebastien
 1. Still trying to correct day three issue
 2.in 24 hours I will plug in all created templates
+*********************** Day five ************************
+Aliakbar
+1. finish the edit and delete employee templates but not search
+2. in 24 hours I will work on list employees and customer templates:add/edit/delete/list
+*********************** Day six ************************
+Aliakbar
+1.finish the employee list template and started the customer templates
+2.in 24 hours I will finish add cutomer template with validations and if it possible on edit
+*********************** Day seven ************************
+Aliakbar
+1. finish the add customer tempalte with validation and edit template almost finish
+2. I will finish the other cutomer related templates
+*********************** Day eight ************************
+Aliakbar
+1. finish the customer templates completely 
+2. in 24 hours I will work on product templates
+*********************** Day nine ************************
+Aliakbar
+1. add & edit product template are finished 
+2. in 24 hours I will work on delete and list product templates
+*********************** Day ten ************************
+Aliakbar
+1.all product templates are finished 
+2. in 24 hours i will work on change and reset password 
+*********************** Day eleven ************************
+Aliakbar
+1.change password finished but still working on reset 
+2. in 24 hours i will finish reset password and start flash messages
+*********************** Day twelve ************************
+Aliakbar
+1. finish reset password and flash messages
+2. in 24 hours I will work on add to card 
+*********************** Day thirteen ************************
+Aliakbar
+1. finish add to cart
+2. in 24 hours I will work on dashboard and reports 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
