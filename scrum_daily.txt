@@ -34,6 +34,7 @@ Sebastien
 Aliakbar
 1. finish the edit and delete employee templates but not search
 2. in 24 hours I will work on list employees and customer templates:add/edit/delete/list
+
 *********************** Day six ************************
 Aliakbar
 1.finish the employee list template and started the customer templates
@@ -66,6 +67,9 @@ Aliakbar
 Aliakbar
 1. finish add to cart
 2. in 24 hours I will work on dashboard and reports 
+Sebastien
+1. Unable to correct css compiler
+2.in would like to implement api on forms
 
 
 
