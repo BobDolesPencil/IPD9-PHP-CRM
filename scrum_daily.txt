@@ -70,9 +70,15 @@ Aliakbar
 Sebastien
 1. Unable to correct css compiler
 2.in would like to implement api on forms
-
-
-
+*********************** Day fourteen ************************
+Aliakbar
+1.still working on dashboard
+2.in 24 hours try to finish dashboard
+3.have problem in SQL query which need to collect data from 5 table 
+*********************** Day fifteen ************************
+Aliakbar
+1.finish dashboard
+2.in 24 hours try to work on search bars and report template
 
 
 
