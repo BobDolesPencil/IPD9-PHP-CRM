@@ -51,32 +51,20 @@
                         <a href="/editcustomer/{{c.id}}" class="button">Edit</a>
                         <a href="/deletecustomer/{{c.id}}" class="button">Delete</a>
                     </td>
-                    {#{% if user.title == "manager" %}
-                        <td>
-                            <a href="/editemployee/{{u.id}}" class="button">Edit</a>
-                            <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
-                        </td>
-                    {% else %}
-                         <td>
-                            <a href="#" class="button">Edit</a>
-                            <a href="#" class="button">Delete</a>
-                        </td>
-                    {% endif %}#}
-
                 </tr>
             {% endfor %}
         </table>
     </form>
 {% endblock content %}
 {% block leftaside %}
-    {% if flash.addproduct %}
-        <h4>{{flash.addproduct}}</h4>
+    {% if flash.addcustomer %}
+        <h4>{{flash.addcustomer}}</h4>
     {% endif %}
-    {% if flash.editproduct %}
-        <h4>{{flash.editproduct}}</h4>
+    {% if flash.editcustomer %}
+        <h4>{{flash.editcustomer}}</h4>
     {% endif %}
-    {% if flash.deleteproduct %}
-        <h4>{{flash.deleteproduct}}</h4>
+    {% if flash.deletecustomer %}
+        <h4>{{flash.deletecustomer}}</h4>
     {% endif %}
 {% endblock %}
 

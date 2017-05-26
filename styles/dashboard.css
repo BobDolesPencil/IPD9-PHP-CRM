@@ -1,0 +1,30 @@
+table{
+    margin-top: 30px;
+    border-collapse: collapse;
+}
+th,td{
+    border-bottom: 2px solid black;
+    text-align: center;
+}
+.normal{
+    width :90px;
+    height:30px;
+}
+.button{
+    float: right;
+    width: 80px;
+    height: 25px;
+    text-decoration: none;
+    display: inline-block;
+    background-color:darkslategrey ;
+    border-radius: 5px;
+    color: white;
+    padding-left: 8px;
+    padding-top: 10px;
+    text-align: center;
+}
+a:hover{
+    color:yellow;
+    cursor: pointer;
+}
+

@@ -46,12 +46,8 @@
                     </td>
                     <td>
                         <img src="/viewphotousers/{{u.id}}" id="image" alt="Employee Image"/>
-                    </td>
-                    <td>
-                        <a href="/editemployee/{{u.id}}" class="button">Edit</a>
-                        <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
-                    </td>
-                    {#{% if user.title == "manager" %}
+                    </td>                  
+                    {% if user.title == "Manager" %}
                         <td>
                             <a href="/editemployee/{{u.id}}" class="button">Edit</a>
                             <a href="/deleteemployee/{{u.id}}" class="button">Delete</a>
@@ -61,8 +57,7 @@
                             <a href="#" class="button">Edit</a>
                             <a href="#" class="button">Delete</a>
                         </td>
-                    {% endif %}#}
-
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>

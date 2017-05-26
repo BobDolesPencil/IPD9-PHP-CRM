@@ -36,7 +36,6 @@ function sql_error_handler($params) {
     die; // don't want to keep going if a query broke
 }
 
-
 // Slim creation and setup
 $app = new \Slim\Slim(array(
     'view' => new \Slim\Views\Twig()
@@ -80,11 +79,13 @@ $app->post('/', function() use ($app) {
     } else {
         unset($user['password']);
         $_SESSION['user'] = $user;
-        $listallemployee = DB::query("SELECT * FROM employee");
         $twig = $app->view()->getEnvironment();
         $twig->addGlobal('user', $_SESSION['user']);
-        $app->render('listemployee.html.twig', array(
-            'listemployees' => $listallemployee));
+        $todolist = DB::query("SELECT customers.firstname,customers.lastname,customers.phone,customers.email,todos.id,todos.action,todos.dueDate,todos.sendFrom "
+                        . "FROM customers INNER JOIN todos ON customers.id = todos.customerID WHERE todos.isdone=%i AND todos.dueDate <= %t AND todos.employeeID=%i", 0, new DateTime(), $_SESSION['user']['id']);
+        $app->render('dashboard.html.twig', array(
+            'todolist' => $todolist
+        ));
     }
 });
 //LogOut
@@ -218,7 +219,7 @@ $app->post('/changepassword', function()use($app) {
         if ($user['password'] != $oldpass) {
             $error = true;
         }
-        if($newpass == $oldpass){
+        if ($newpass == $oldpass) {
             $error = true;
         }
     }
@@ -233,6 +234,48 @@ $app->post('/changepassword', function()use($app) {
         $app->render('listemployee.html.twig', array(
             'listemployees' => $listallemployee));
     }
+});
+///////////////////////////// All Dashboard Actions /////////////////////
+$app->get('/dashboard', function()use($app) {
+    $todolist = DB::query("SELECT customers.firstname,customers.lastname,customers.phone,customers.email,todos.id,todos.action,todos.dueDate,todos.sendFrom "
+                    . "FROM customers INNER JOIN todos ON customers.id = todos.customerID WHERE todos.isdone=%i AND todos.dueDate <= %t AND todos.employeeID=%i", 0, new DateTime(), $_SESSION['user']['id']);
+    $app->render('dashboard.html.twig', array(
+        'todolist' => $todolist
+    ));
+});
+$app->get('/tododone/:resualt/:id', function($resual, $id)use($app) {
+    DB::update('todos', array(
+        'actionResult' => $resual,
+        'doneDate' => new DateTime(),
+        'isDone' => 1
+            ), "id=%i", $id);
+});
+$app->get('/todotransfered/:id', function($id = 0)use($app) {
+    $app->render('todotransfered.html.twig');
+});
+$app->post('/todotransfered/:id', function($id = 0)use($app) {
+    $newid = $app->request()->post('employeeid');
+    $newaction = $app->request()->post('action');
+    $donetillnow = $app->request()->post('doneyet');
+    $todo = DB::queryFirstRow("SELECT * FROM todos WHERE id=%i", $id);
+    DB::insert('todos', array(
+        'customerID' => $todo['customerID'],
+        'employeeID' => $newid,
+        'action' => $newaction,
+        'isDone' => 0,
+        'dueDate' => new DateTime(),
+        'sendFrom' => $_SESSION['user']['id']
+    ));
+    DB::update('todos', array(
+        'actionResult' => $donetillnow,
+        'doneDate' => new DateTime(),
+        'isDone' => 1
+            ), "id=%i", $id);
+    $todolist = DB::query("SELECT customers.firstname,customers.lastname,customers.phone,customers.email,todos.id,todos.action,todos.dueDate,todos.sendFrom "
+                    . "FROM customers INNER JOIN todos ON customers.id = todos.customerID WHERE todos.isdone=%i AND todos.dueDate <= %t AND todos.employeeID=%i", 0, new DateTime(), $_SESSION['user']['id']);
+    $app->render('dashboard.html.twig', array(
+        'todolist' => $todolist
+    ));
 });
 ///////////////////////////// All Employee Actions /////////////////////
 //List All Employees
@@ -325,19 +368,11 @@ $app->post('/addemployee', function() use($app) {
 });
 //Edit Employee
 $app->get('/editemployee/:id', function($id = 0) use($app) {
-    if (($_SESSION['user']['title'] != "Manager")) {
-        echo ("<SCRIPT LANGUAGE='JavaScript'>
-         window.alert('You have No Permission to do this Operation!.')
-         window.location.href='/listemployee';
-        </SCRIPT>");
-    } else {
-        $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
-        $app->render("editemployee.html.twig", array(
-            'v' => $valuelist));
-    }
+    $valuelist = DB::queryFirstRow("SELECT * FROM employee WHERE id=%i", $id);
+    $app->render("editemployee.html.twig", array(
+        'v' => $valuelist));
 });
 $app->post('/editemployee/:id', function($id = 0) use($app) {
-
     $fname = $app->request()->post('firstname');
     $lname = $app->request()->post('lastname');
     $birthdate = $app->request()->post('birthdate');
@@ -431,17 +466,10 @@ $app->post('/editemployee/:id', function($id = 0) use($app) {
 });
 // Delete Employee
 $app->get('/deleteemployee/:id', function($id = 0) use ($app) {
-    if (($_SESSION['user']['title'] != "Manager")) {
-        echo ("<SCRIPT LANGUAGE='JavaScript'>
-        window.alert('You have No Permission to do this Operation!.')
-         window.location.href='/listemployee';
-        </SCRIPT>");
-    } else {
-        $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
-        $app->render('deleteemployee.html.twig', array(
-            'employee' => $employee
-        ));
-    }
+    $employee = DB::queryFirstRow('SELECT * FROM employee WHERE id=%i', $id);
+    $app->render('deleteemployee.html.twig', array(
+        'employee' => $employee
+    ));
 });
 $app->get('/deleteemployee/delete/:id', function($id = 0) use ($app) {
     DB::delete('employee', 'id=%i', $id);
@@ -630,6 +658,35 @@ $app->post('/addproduct', function() use ($app) {
             'mimetype' => $mimeType
         ));
         $app->flashNow('addproduct', 'Product Added Successfully');
+        //make a todo for employees after add a new product
+        $cutomerids = DB::query("SELECT customers.id FROM customers INNER JOIN orders ON customers.id =orders.customerID WHERE orders.id = ANY (SELECT orderitems.orderID from orderitems INNER JOIN products on orderitems.origProductID = products.id WHERE products.categoryID = %i)", $catid['id']);
+        $employeeids = DB::query("SELECT id from employee WHERE title='employee'");
+        $counter = 0;
+        foreach ($cutomerids as $cust) {
+            if ($counter <= sizeof($employeeids)) {
+                DB::insert('todos', array(
+                    'customerID' => $cust['id'],
+                    'employeeID' => $employeeids[$counter]['id'],
+                    'action' => "Call",
+                    'isDone' => 0,
+                    'dueDate' => new DateTime(),
+                    'sendFrom' => "System"
+                ));
+                $counter++;
+            } else {
+                $counter = 0;
+                DB::insert('todos', array(
+                    'customerID' => $cust['id'],
+                    'employeeID' => $employeeids[$counter]['id'],
+                    'action' => "Call/Present a New Product.",
+                    'isDone' => 0,
+                    'dueDate' => new DateTime(),
+                    'sendFrom' => "System"
+                ));
+                $counter++;
+            }
+        }
+        //end
         $listallproducts = DB::query("SELECT * FROM products");
         $app->render('listproducts.html.twig', array(
             'listproducts' => $listallproducts));
@@ -643,16 +700,9 @@ $app->post('/addproduct', function() use ($app) {
 });
 //Edit Product
 $app->get('/editproduct/:id', function($id = 0) use($app) {
-    if (($_SESSION['user']['title'] != "Manager")) {
-        echo ("<SCRIPT LANGUAGE='JavaScript'>
-         window.alert('You have No Permission to do this Operation!.')
-         window.location.href='/listproducts';
-        </SCRIPT>");
-    } else {
-        $valuelist = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
-        $app->render("editproduct.html.twig", array(
-            'v' => $valuelist));
-    }
+    $valuelist = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
+    $app->render("editproduct.html.twig", array(
+        'v' => $valuelist));
 });
 $app->post('/editproduct/:id', function($id = 0) use($app) {
 
@@ -721,17 +771,10 @@ $app->post('/editproduct/:id', function($id = 0) use($app) {
 });
 // Delete Product
 $app->get('/deleteproduct/:id', function($id = 0) use ($app) {
-    if (($_SESSION['user']['title'] != "Manager")) {
-        echo ("<SCRIPT LANGUAGE='JavaScript'>
-         window.alert('You have No Permission to do this Operation!.')
-         window.location.href='/listproducts';
-        </SCRIPT>");
-    } else {
-        $product = DB::queryFirstRow('SELECT * FROM products WHERE id=%i', $id);
-        $app->render('deleteproduct.html.twig', array(
-            'p' => $product
-        ));
-    }
+    $product = DB::queryFirstRow('SELECT * FROM products WHERE id=%i', $id);
+    $app->render('deleteproduct.html.twig', array(
+        'p' => $product
+    ));
 });
 $app->get('/deleteproduct/delete/:id', function($id = 0) use ($app) {
     DB::delete('products', 'id=%i', $id);

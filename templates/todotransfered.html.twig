@@ -1,0 +1,28 @@
+{% extends "master.html.twig" %}
+{% block title %}Transfer{% endblock %}
+{% block headExtra %}
+    <style>
+        form{
+            margin-top: 100px;
+        }
+        input{
+            margin-top: 20px;
+        }
+        .button{
+            cursor: pointer;
+            height: 30px;
+            width: 120px;
+        }
+        .text{
+            height: 25px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <form method="post">
+        What you done till Now:<textarea rows="5" cols="50" placeholder="Type What you done yet" name="doneyet" id="doneyet" required></textarea>
+        Enter Your Colleague Id Number:<input type="text" name="employeeid" pattern="[0-9]{1,}" size="30" class="text" required placeholder="Number only"/><br/>
+        Message :<input type="text" name="action" size="30" class="text" required/><br/>
+        <input type="submit" value="Transfer" class="button"/>
+    </form>
+{% endblock %}

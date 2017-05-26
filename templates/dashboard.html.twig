@@ -1,0 +1,71 @@
+{% extends "master.html.twig" %}
+{% block title %}Dashboard{% endblock %}
+{% block headExtra %}
+    <link type="text/css" rel="stylesheet" href="/styles/dashboard.css"/>
+     <script type="text/javascript" src="/scripts/dashboard.js"></script>
+{% endblock %}
+{% block content %}
+        <table>
+            <tr>
+                <th class="normal">
+                    Customer Name
+                </th>
+                <th class="normal">
+                    Last Name
+                </th>
+                <th class="normal">
+                    Phone
+                </th>
+                <th class="normal">
+                    Email
+                </th>
+                <th class="normal">
+                    Send from
+                </th>
+                <th class="normal">
+                    Action
+                </th>
+                <th class="normal">
+                    Due date
+                </th>
+                <th class="normal">
+                    Result
+                </th>           
+                <th class="normal">
+                    Operations
+                </th>
+            </tr>
+            {% for t in todolist %}
+                <tr>
+                    <td class="normal">
+                        {{t.firstname}}
+                    </td>
+                    <td class="normal">
+                        {{t.lastname}}
+                    </td>
+                    <td class="normal">
+                        {{t.phone}}
+                    </td>
+                    <td class="normal">
+                        {{t.email}}
+                    </td>
+                    <td class="normal">
+                        {{t.sendFrom}}
+                    </td>
+                    <td class="normal">
+                        {{t.dueDate}}
+                    </td>
+                    <td class="normal">
+                        {{t.action}}
+                    </td>
+                    <td class="normal">
+                        <textarea rows="5" cols="25" placeholder="Type result here" name="result" id="result"></textarea>
+                    </td>                            
+                    <td class="normal">
+                        <a herf="" class="button" onclick="update(event,{{t.id}});">Done</a>
+                        <a href="/todotransfered/{{t.id}}" class="button" >Transfer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+{% endblock %}

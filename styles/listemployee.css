@@ -23,12 +23,7 @@ td,th{
     padding-left:0;
     width :150px;
     height:30px;
-}
-tr:nth-child(even) {
-    background-color:silver;
-}
-tr:nth-child(odd) {
-    background-color:lightgrey;
+    border-bottom: 2px solid black;
 }
 #image{
     border: 1px solid #bbb;
@@ -37,14 +32,17 @@ tr:nth-child(odd) {
     height:75px;
 }
 .button{
-    width: 50px;
-    height: 20px;
+    float: right;
+    width: 80px;
+    height: 25px;
     text-decoration: none;
     display: inline-block;
     background-color:darkslategrey ;
     border-radius: 5px;
     color: white;
-    padding-left: 10px;   
+    padding-left: 8px;
+    padding-top: 10px;
+    text-align: center;
 }
 a:hover{
     color:yellow;

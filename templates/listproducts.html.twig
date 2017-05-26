@@ -12,7 +12,7 @@
 
         <input id="two" name="tabs" type="radio" value="Two" onclick="myFunction2();">
         <label for="two">Hardware</label>
-        <a href="/addproduct" class="button">Add Product</a>
+        <a href="/addproduct" class="topbutton">Add Product</a>
         <div class="panels">
             <div class="panel">
                 <table id="tblsoft">
@@ -60,11 +60,22 @@
                                 <td class="picture">
                                     <img src="/viewphotoproduct/{{p.id}}" id="image" alt="Product Image"/>
                                 </td>
-                                <td>
-                                    <a href="/editproduct/{{p.id}}" class="button">Edit</a>
-                                    <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
-                                    <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
-                                </td>
+                                {% if user.title == "Manager" %}
+                                    <td>
+                                    <td>
+                                        <a href="/editproduct/{{p.id}}" class="button">Edit</a>
+                                        <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                        <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
+                                    </td>
+                                    </td>
+                                {% else %}
+                                    <td>
+                                        <a href="#" class="button">Edit</a>
+                                        <a href="#" class="button">Delete</a>
+                                        <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
+                                    </td>
+                                {% endif %}
+
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -116,11 +127,21 @@
                                 <td class="picture">
                                     <img src="/viewphotoproduct/{{p.id}}" id="image" alt="Product Image"/>
                                 </td>
-                                <td>
-                                    <a href="/editproduct/{{p.id}}" class="button">Edit</a>
-                                    <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
-                                    <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
-                                </td>
+                                {% if user.title == "Manager" %}
+                                    <td>
+                                    <td>
+                                        <a href="/editproduct/{{p.id}}" class="button">Edit</a>
+                                        <a href="/deleteproduct/{{p.id}}" class="button">Delete</a>
+                                        <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
+                                    </td>
+                                    </td>
+                                {% else %}
+                                    <td>
+                                        <a href="#" class="button">Edit</a>
+                                        <a href="#" class="button">Delete</a>
+                                        <a href="/addtocart/{{p.id}}" class="button">Add to Cart</a>
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -130,13 +151,14 @@
     </article>
 {% endblock %}
 {% block leftaside %}
-    {% if flash.addcustomer %}
-        <h4>{{flash.addcustomer}}</h4>
+    {% if flash.addproduct %}
+        <h4>{{flash.addproduct}}</h4>
     {% endif %}
-    {% if flash.editcustomer %}
-        <h4>{{flash.editcustomer}}</h4>
+    {% if flash.editproduct %}
+        <h4>{{flash.editproduct}}</h4>
     {% endif %}
-    {% if flash.deletecustomer %}
-        <h4>{{flash.deletecustomer}}</h4>
+    {% if flash.deleteproduct %}
+        <h4>{{flash.deleteproduct}}</h4>
     {% endif %}
 {% endblock %}
+
