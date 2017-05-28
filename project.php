@@ -196,14 +196,22 @@ $app->map('/passreset/:secretToken', function($secretToken) use ($app, $log) {
         } else {
             // success - reset the password
             DB::update('employee', array(
-                'password' => password_hash($pass1, CRYPT_BLOWFISH)
-                    ), "ID=%d", $row['employeeID']);
+                'password' => $pass1
+                    ), "id=%i", $row['employeeID']);
             DB::delete('passresets', 'secretToken=%s', $secretToken);
             $app->render('passreset_form_success.html.twig');
             $log->info("Password reset completed for " . $row['email'] . " uid=" . $row['employeeID']);
         }
     }
 })->via('GET', 'POST');
+function verifyPassword($pass1) {
+    if (!preg_match('/[0-9;\'".,<>`~|!@#$%^&*()_+=-]/', $pass1) || (!preg_match('/[a-z]/', $pass1)) || (!preg_match('/[A-Z]/', $pass1)) || (strlen($pass1) < 8)) {
+        return "Password must be at least 8 characters " .
+                "long, contain at least one upper case, one lower case, " .
+                " one digit or special character";
+    }
+    return TRUE;
+}
 //Change password in app
 $app->get('/changepassword', function()use($app) {
     $app->render('changepassword.html.twig');
