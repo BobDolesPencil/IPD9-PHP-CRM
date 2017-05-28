@@ -1,24 +1,3 @@
-{% extends "master.html.twig" %}
-{% block title %}All Employees{% endblock %}
-{% block headExtra %}
-    <link rel="stylesheet" type="text/css" href="/styles/listemployee.css"/>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/scripts/listemployee.js"></script>
-    <script>
-      /*  $(document).ready(function() {
-            $("#search").keyup(function() {
-                var search = $("#search").val();
-                if (search === "") return; // fixme
-                $('#employeeList').load('/listemployee/' + search);
-            });
-        });*/
-    </script>
-{% endblock %}
-{% block content %}
-    <form name="form1" id="form1">
-        <input type="text" placeholder="type to search" size="100" id="search"/>
-        <button id="addEmployeeButton" >Add Employee</button>
-        <table id="employeeList">
             <tr>
                 <th>
                     First Name
@@ -69,26 +48,3 @@
                     {% endif %}
                 </tr>
             {% endfor %}
-        </table>
-    </form>
-{% endblock content %}
-{% block leftaside %}
-    {% if flash.logedin  %}
-        <h4>
-            {{user.firstname}} is {{flash.logedin}}
-        </h4>
-    {% endif %}
-    {% if flash.addemployee %}
-        <h4>{{flash.addemployee}}</h4>
-    {% endif %}
-    {% if flash.editemployee %}
-        <h4>{{flash.editemployee}}</h4>
-    {% endif %}
-    {% if flash.deleteemployee %}
-        <h4>{{flash.deleteemployee}}</h4>
-    {% endif %}
-    {% if flash.passchange %}
-        <h4>{{flash.passchange}}</h4>
-    {% endif %}
-{% endblock %}
-

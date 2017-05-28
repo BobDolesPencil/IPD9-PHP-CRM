@@ -279,11 +279,24 @@ $app->post('/todotransfered/:id', function($id = 0)use($app) {
 });
 ///////////////////////////// All Employee Actions /////////////////////
 //List All Employees
-$app->get('/listemployee', function() use($app) {
+$app->get('/listemployee', function() use ($app) {
     $listallemployee = DB::query("SELECT * FROM employee");
     $app->render('listemployee.html.twig', array(
         'listemployees' => $listallemployee));
 });
+// for AJAX - returns partial HTML only! Employees Search
+$app->get('/listemployee/:keyword', function($keyword) use ($app) {
+    if ($keyword == "all") {
+        $listallemployee = DB::query("SELECT * FROM employee");
+        $app->render('listemployee_table.html.twig', array(
+            'listemployees' => $listallemployee));
+    } else {
+        $listallemployee = DB::query("SELECT * FROM employee WHERE firstname LIKE %ss OR lastname LIKE %ss OR email LIKE %ss", $keyword, $keyword, $keyword);
+        $app->render('listemployee_table.html.twig', array(
+            'listemployees' => $listallemployee));
+    }
+});
+//Show employee images
 $app->get('/viewphotousers/:userId', function($userId) use ($app) {
     $emp = DB::queryFirstRow("SELECT image, mimetype FROM employee WHERE id=%i", $userId);
     $app->response->headers->set('Content-Type', $emp['mimetype']);
@@ -485,6 +498,18 @@ $app->get('/listcustomers', function() use($app) {
     $listallcustomers = DB::query("SELECT * FROM customers");
     $app->render('listcustomers.html.twig', array(
         'listcustomers' => $listallcustomers));
+});
+// for AJAX - returns partial HTML only! Customers Search
+$app->get('/listcustomers/:keyword', function($keyword) use ($app) {
+    if ($keyword == "all") {
+        $listallcustomers = DB::query("SELECT * FROM customers");
+        $app->render('listcustomers_table.html.twig', array(
+            'listcustomers' => $listallcustomers));
+    } else {
+        $listallcustomers = DB::query("SELECT * FROM customers WHERE firstname LIKE %ss OR lastname LIKE %ss OR email LIKE %ss", $keyword, $keyword, $keyword);
+        $app->render('listcustomers_table.html.twig', array(
+            'listcustomers' => $listallcustomers));
+    }
 });
 //Add Customer
 $app->get('/addcustomer', function() use ($app) {
@@ -915,5 +940,3 @@ $app->map('/order', function () use ($app) {
 })->via('GET', 'POST');
 /////////////////////////////End of All Cart Actions /////////////////////
 $app->run();
-
-

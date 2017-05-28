@@ -65,6 +65,9 @@ header h1 {
 #mainmenu li a:hover {
     color:yellow;
 }
+#mainmenu li a:active {
+    color:yellow;
+}
 
 #content {
     float:left;

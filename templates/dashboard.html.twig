@@ -69,3 +69,10 @@
             {% endfor %}
         </table>
 {% endblock %}
+{% block leftaside %}
+    {% if flash.logedin  %}
+        <h4>
+            {{user.firstname}} is {{flash.logedin}}
+        </h4>
+    {% endif %}
+{% endblock %}

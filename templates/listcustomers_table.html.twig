@@ -1,0 +1,47 @@
+
+<tr>
+    <th>
+        First Name
+    </th>
+    <th>
+        Last Name
+    </th>
+    <th>
+        Email
+    </th>
+    <th>
+        Phone
+    </th>
+    <th>
+        Address
+    </th>
+    <th>
+        Operations
+    </th>
+</tr>
+{% for c in listcustomers %}
+    <tr>
+        <td>
+            {{c.firstname}}
+        </td>
+        <td>
+            {{c.lastname}}
+        </td>
+        <td>
+            {{c.email}}
+        </td>
+        <td>
+            {{c.phone}}
+        </td>
+        <td>
+            {{"#"~c.appNo~","~c.address~","~c.postalcode~","~c.country}}
+        </td>
+        <td>
+            <a href="/editcustomer/{{c.id}}" class="button">Edit</a>
+            <a href="/deletecustomer/{{c.id}}" class="button">Delete</a>
+        </td>
+    </tr>
+{% endfor %}
+
+
+
