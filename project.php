@@ -204,6 +204,7 @@ $app->map('/passreset/:secretToken', function($secretToken) use ($app, $log) {
         }
     }
 })->via('GET', 'POST');
+
 function verifyPassword($pass1) {
     if (!preg_match('/[0-9;\'".,<>`~|!@#$%^&*()_+=-]/', $pass1) || (!preg_match('/[a-z]/', $pass1)) || (!preg_match('/[A-Z]/', $pass1)) || (strlen($pass1) < 8)) {
         return "Password must be at least 8 characters " .
@@ -212,6 +213,7 @@ function verifyPassword($pass1) {
     }
     return TRUE;
 }
+
 //Change password in app
 $app->get('/changepassword', function()use($app) {
     $app->render('changepassword.html.twig');
@@ -738,7 +740,6 @@ $app->get('/editproduct/:id', function($id = 0) use($app) {
         'v' => $valuelist));
 });
 $app->post('/editproduct/:id', function($id = 0) use($app) {
-
     $name = $app->request()->post('productname');
     $price = $app->request()->post('price');
     $discount = $app->request()->post('discount');
@@ -757,6 +758,7 @@ $app->post('/editproduct/:id', function($id = 0) use($app) {
     );
     $errorList = array();
     if ($_FILES['image']['size'] == 0) {
+        $oldinfo = DB::queryFirstRow("SELECT * FROM products WHERE id=%i", $id);
         DB::update('products', array(
             'name' => $name,
             'price' => $price,
@@ -765,6 +767,37 @@ $app->post('/editproduct/:id', function($id = 0) use($app) {
             'discountstartdate' => $startdate,
             'discountenddate' => $enddate
                 ), "id=%i", $id);
+        if ($oldinfo['discount'] != $discount) {
+            //make a todo for employees after add a new product
+            $cutomerids = DB::query("SELECT customers.id FROM customers INNER JOIN orders ON customers.id =orders.customerID WHERE orders.id = ANY (SELECT orderitems.orderID from orderitems INNER JOIN products on orderitems.origProductID = products.id WHERE products.categoryID = %i)", $catid['id']);
+            $employeeids = DB::query("SELECT id from employee WHERE title='employee'");
+            $counter = 0;
+            foreach ($cutomerids as $cust) {
+                if ($counter <= sizeof($employeeids)) {
+                    DB::insert('todos', array(
+                        'customerID' => $cust['id'],
+                        'employeeID' => $employeeids[$counter]['id'],
+                        'action' => "Call or send email",
+                        'isDone' => 0,
+                        'dueDate' => new DateTime(),
+                        'sendFrom' => "System"
+                    ));
+                    $counter++;
+                } else {
+                    $counter = 0;
+                    DB::insert('todos', array(
+                        'customerID' => $cust['id'],
+                        'employeeID' => $employeeids[$counter]['id'],
+                        'action' => "Call/Present a New Product.",
+                        'isDone' => 0,
+                        'dueDate' => new DateTime(),
+                        'sendFrom' => "System"
+                    ));
+                    $counter++;
+                }
+            }
+            //end
+        }
         $app->flashNow('editproduct', 'Product Edited successfully.');
         $listallproducts = DB::query("SELECT * FROM products");
         $app->render('listproducts.html.twig', array(
